@@ -29065,7 +29065,13 @@
                     for (var r in rows) {
                         for (var i in rows[r]) {
                             var item = rows[r][i];
-                            thumbs.push(item);
+                            if (this.props.maxRows) {
+                                if (r < this.props.maxRows) {
+                                    thumbs.push(item);
+                                }
+                            } else {
+                                thumbs.push(item);
+                            }
                         }
                     }
                     return thumbs;
@@ -29140,6 +29146,7 @@
             enableImageSelection: _react.PropTypes.bool,
             onSelectImage: _react.PropTypes.func,
             rowHeight: _react.PropTypes.number,
+            maxRows: _react.PropTypes.number,
             margin: _react.PropTypes.number,
             onClickThumbnail: _react.PropTypes.func,
             lightboxWillOpen: _react.PropTypes.func,
@@ -29409,6 +29416,7 @@
                             },
                             tags
                         ),
+                        this.props.item.customOverlay ? this.props.item.customOverlay : '',
                         _react2.default.createElement('div', {
                             className: 'tile-overlay',
                             key: "tile-overlay-" + this.props.index,
