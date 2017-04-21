@@ -436,10 +436,10 @@
         _reactDom2.default.render(_react2.default.createElement(Demo0, null), document.getElementById('demo0'));
 
     }, {
-        "../src/CheckButton": 242,
-        "../src/Gallery": 243,
-        "react": 241,
-        "react-dom": 58
+        "../src/CheckButton": 246,
+        "../src/Gallery": 247,
+        "react": 245,
+        "react-dom": 62
     }],
     2: [function(require, module, exports) {
         'use strict';
@@ -631,9 +631,9 @@
         _reactDom2.default.render(_react2.default.createElement(Demo1, null), document.getElementById('demo1'));
 
     }, {
-        "../src/Gallery": 243,
-        "react": 241,
-        "react-dom": 58
+        "../src/Gallery": 247,
+        "react": 245,
+        "react-dom": 62
     }],
     3: [function(require, module, exports) {
         'use strict';
@@ -809,9 +809,9 @@
         _reactDom2.default.render(_react2.default.createElement(Demo2, null), document.getElementById('demo2'));
 
     }, {
-        "../src/Gallery": 243,
-        "react": 241,
-        "react-dom": 58
+        "../src/Gallery": 247,
+        "react": 245,
+        "react-dom": 62
     }],
     4: [function(require, module, exports) {
         'use strict';
@@ -985,9 +985,9 @@
         _reactDom2.default.render(_react2.default.createElement(Demo3, null), document.getElementById('demo3'));
 
     }, {
-        "../src/Gallery": 243,
-        "react": 241,
-        "react-dom": 58
+        "../src/Gallery": 247,
+        "react": 245,
+        "react-dom": 62
     }],
     5: [function(require, module, exports) {
         'use strict';
@@ -4630,19 +4630,623 @@
 
     }, {}],
     57: [function(require, module, exports) {
-        module.exports = require('react/lib/ReactCSSTransitionGroup');
+        (function(process) {
+            /**
+             * Copyright 2013-present, Facebook, Inc.
+             * All rights reserved.
+             *
+             * This source code is licensed under the BSD-style license found in the
+             * LICENSE file in the root directory of this source tree. An additional grant
+             * of patent rights can be found in the PATENTS file in the same directory.
+             */
+
+            'use strict';
+
+            if (process.env.NODE_ENV !== 'production') {
+                var invariant = require('fbjs/lib/invariant');
+                var warning = require('fbjs/lib/warning');
+                var ReactPropTypesSecret = require('./lib/ReactPropTypesSecret');
+                var loggedTypeFailures = {};
+            }
+
+            /**
+             * Assert that the values match with the type specs.
+             * Error messages are memorized and will only be shown once.
+             *
+             * @param {object} typeSpecs Map of name to a ReactPropType
+             * @param {object} values Runtime values that need to be type-checked
+             * @param {string} location e.g. "prop", "context", "child context"
+             * @param {string} componentName Name of the component for error messages.
+             * @param {?Function} getStack Returns the component stack.
+             * @private
+             */
+            function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
+                if (process.env.NODE_ENV !== 'production') {
+                    for (var typeSpecName in typeSpecs) {
+                        if (typeSpecs.hasOwnProperty(typeSpecName)) {
+                            var error;
+                            // Prop type validation may throw. In case they do, we don't want to
+                            // fail the render phase where it didn't fail before. So we log it.
+                            // After these have been cleaned up, we'll let them throw.
+                            try {
+                                // This is intentionally an invariant that gets caught. It's the same
+                                // behavior as without this statement except with a better message.
+                                invariant(typeof typeSpecs[typeSpecName] === 'function', '%s: %s type `%s` is invalid; it must be a function, usually from ' + 'React.PropTypes.', componentName || 'React class', location, typeSpecName);
+                                error = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, ReactPropTypesSecret);
+                            } catch (ex) {
+                                error = ex;
+                            }
+                            warning(!error || error instanceof Error, '%s: type specification of %s `%s` is invalid; the type checker ' + 'function must return `null` or an `Error` but returned a %s. ' + 'You may have forgotten to pass an argument to the type checker ' + 'creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and ' + 'shape all require an argument).', componentName || 'React class', location, typeSpecName, typeof error);
+                            if (error instanceof Error && !(error.message in loggedTypeFailures)) {
+                                // Only monitor this failure once because there tends to be a lot of the
+                                // same error.
+                                loggedTypeFailures[error.message] = true;
+
+                                var stack = getStack ? getStack() : '';
+
+                                warning(false, 'Failed %s type: %s%s', location, error.message, stack != null ? stack : '');
+                            }
+                        }
+                    }
+                }
+            }
+
+            module.exports = checkPropTypes;
+
+        }).call(this, require('_process'))
     }, {
-        "react/lib/ReactCSSTransitionGroup": 214
+        "./lib/ReactPropTypesSecret": 60,
+        "_process": 56,
+        "fbjs/lib/invariant": 29,
+        "fbjs/lib/warning": 36
     }],
     58: [function(require, module, exports) {
+        /**
+         * Copyright 2013-present, Facebook, Inc.
+         * All rights reserved.
+         *
+         * This source code is licensed under the BSD-style license found in the
+         * LICENSE file in the root directory of this source tree. An additional grant
+         * of patent rights can be found in the PATENTS file in the same directory.
+         */
+
+        'use strict';
+
+        // React 15.5 references this module, and assumes PropTypes are still callable in production.
+        // Therefore we re-export development-only version with all the PropTypes checks here.
+        // However if one is migrating to the `prop-types` npm library, they will go through the
+        // `index.js` entry point, and it will branch depending on the environment.
+        var factory = require('./factoryWithTypeCheckers');
+        module.exports = function(isValidElement) {
+            // It is still allowed in 15.5.
+            var throwOnDirectAccess = false;
+            return factory(isValidElement, throwOnDirectAccess);
+        };
+
+    }, {
+        "./factoryWithTypeCheckers": 59
+    }],
+    59: [function(require, module, exports) {
+        (function(process) {
+            /**
+             * Copyright 2013-present, Facebook, Inc.
+             * All rights reserved.
+             *
+             * This source code is licensed under the BSD-style license found in the
+             * LICENSE file in the root directory of this source tree. An additional grant
+             * of patent rights can be found in the PATENTS file in the same directory.
+             */
+
+            'use strict';
+
+            var emptyFunction = require('fbjs/lib/emptyFunction');
+            var invariant = require('fbjs/lib/invariant');
+            var warning = require('fbjs/lib/warning');
+
+            var ReactPropTypesSecret = require('./lib/ReactPropTypesSecret');
+            var checkPropTypes = require('./checkPropTypes');
+
+            module.exports = function(isValidElement, throwOnDirectAccess) {
+                /* global Symbol */
+                var ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;
+                var FAUX_ITERATOR_SYMBOL = '@@iterator'; // Before Symbol spec.
+
+                /**
+                 * Returns the iterator method function contained on the iterable object.
+                 *
+                 * Be sure to invoke the function with the iterable as context:
+                 *
+                 *     var iteratorFn = getIteratorFn(myIterable);
+                 *     if (iteratorFn) {
+                 *       var iterator = iteratorFn.call(myIterable);
+                 *       ...
+                 *     }
+                 *
+                 * @param {?object} maybeIterable
+                 * @return {?function}
+                 */
+                function getIteratorFn(maybeIterable) {
+                    var iteratorFn = maybeIterable && (ITERATOR_SYMBOL && maybeIterable[ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL]);
+                    if (typeof iteratorFn === 'function') {
+                        return iteratorFn;
+                    }
+                }
+
+                /**
+                 * Collection of methods that allow declaration and validation of props that are
+                 * supplied to React components. Example usage:
+                 *
+                 *   var Props = require('ReactPropTypes');
+                 *   var MyArticle = React.createClass({
+                 *     propTypes: {
+                 *       // An optional string prop named "description".
+                 *       description: Props.string,
+                 *
+                 *       // A required enum prop named "category".
+                 *       category: Props.oneOf(['News','Photos']).isRequired,
+                 *
+                 *       // A prop named "dialog" that requires an instance of Dialog.
+                 *       dialog: Props.instanceOf(Dialog).isRequired
+                 *     },
+                 *     render: function() { ... }
+                 *   });
+                 *
+                 * A more formal specification of how these methods are used:
+                 *
+                 *   type := array|bool|func|object|number|string|oneOf([...])|instanceOf(...)
+                 *   decl := ReactPropTypes.{type}(.isRequired)?
+                 *
+                 * Each and every declaration produces a function with the same signature. This
+                 * allows the creation of custom validation functions. For example:
+                 *
+                 *  var MyLink = React.createClass({
+                 *    propTypes: {
+                 *      // An optional string or URI prop named "href".
+                 *      href: function(props, propName, componentName) {
+                 *        var propValue = props[propName];
+                 *        if (propValue != null && typeof propValue !== 'string' &&
+                 *            !(propValue instanceof URI)) {
+                 *          return new Error(
+                 *            'Expected a string or an URI for ' + propName + ' in ' +
+                 *            componentName
+                 *          );
+                 *        }
+                 *      }
+                 *    },
+                 *    render: function() {...}
+                 *  });
+                 *
+                 * @internal
+                 */
+
+                var ANONYMOUS = '<<anonymous>>';
+
+                // Important!
+                // Keep this list in sync with production version in `./factoryWithThrowingShims.js`.
+                var ReactPropTypes = {
+                    array: createPrimitiveTypeChecker('array'),
+                    bool: createPrimitiveTypeChecker('boolean'),
+                    func: createPrimitiveTypeChecker('function'),
+                    number: createPrimitiveTypeChecker('number'),
+                    object: createPrimitiveTypeChecker('object'),
+                    string: createPrimitiveTypeChecker('string'),
+                    symbol: createPrimitiveTypeChecker('symbol'),
+
+                    any: createAnyTypeChecker(),
+                    arrayOf: createArrayOfTypeChecker,
+                    element: createElementTypeChecker(),
+                    instanceOf: createInstanceTypeChecker,
+                    node: createNodeChecker(),
+                    objectOf: createObjectOfTypeChecker,
+                    oneOf: createEnumTypeChecker,
+                    oneOfType: createUnionTypeChecker,
+                    shape: createShapeTypeChecker
+                };
+
+                /**
+                 * inlined Object.is polyfill to avoid requiring consumers ship their own
+                 * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
+                 */
+                /*eslint-disable no-self-compare*/
+                function is(x, y) {
+                    // SameValue algorithm
+                    if (x === y) {
+                        // Steps 1-5, 7-10
+                        // Steps 6.b-6.e: +0 != -0
+                        return x !== 0 || 1 / x === 1 / y;
+                    } else {
+                        // Step 6.a: NaN == NaN
+                        return x !== x && y !== y;
+                    }
+                }
+                /*eslint-enable no-self-compare*/
+
+                /**
+                 * We use an Error-like object for backward compatibility as people may call
+                 * PropTypes directly and inspect their output. However, we don't use real
+                 * Errors anymore. We don't inspect their stack anyway, and creating them
+                 * is prohibitively expensive if they are created too often, such as what
+                 * happens in oneOfType() for any type before the one that matched.
+                 */
+                function PropTypeError(message) {
+                    this.message = message;
+                    this.stack = '';
+                }
+                // Make `instanceof Error` still work for returned errors.
+                PropTypeError.prototype = Error.prototype;
+
+                function createChainableTypeChecker(validate) {
+                    if (process.env.NODE_ENV !== 'production') {
+                        var manualPropTypeCallCache = {};
+                        var manualPropTypeWarningCount = 0;
+                    }
+
+                    function checkType(isRequired, props, propName, componentName, location, propFullName, secret) {
+                        componentName = componentName || ANONYMOUS;
+                        propFullName = propFullName || propName;
+
+                        if (secret !== ReactPropTypesSecret) {
+                            if (throwOnDirectAccess) {
+                                // New behavior only for users of `prop-types` package
+                                invariant(
+                                    false,
+                                    'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
+                                    'Use `PropTypes.checkPropTypes()` to call them. ' +
+                                    'Read more at http://fb.me/use-check-prop-types'
+                                );
+                            } else if (process.env.NODE_ENV !== 'production' && typeof console !== 'undefined') {
+                                // Old behavior for people using React.PropTypes
+                                var cacheKey = componentName + ':' + propName;
+                                if (!manualPropTypeCallCache[cacheKey] &&
+                                    // Avoid spamming the console because they are often not actionable except for lib authors
+                                    manualPropTypeWarningCount < 3
+                                ) {
+                                    warning(
+                                        false,
+                                        'You are manually calling a React.PropTypes validation ' +
+                                        'function for the `%s` prop on `%s`. This is deprecated ' +
+                                        'and will throw in the standalone `prop-types` package. ' +
+                                        'You may be seeing this warning due to a third-party PropTypes ' +
+                                        'library. See https://fb.me/react-warning-dont-call-proptypes ' + 'for details.',
+                                        propFullName,
+                                        componentName
+                                    );
+                                    manualPropTypeCallCache[cacheKey] = true;
+                                    manualPropTypeWarningCount++;
+                                }
+                            }
+                        }
+                        if (props[propName] == null) {
+                            if (isRequired) {
+                                if (props[propName] === null) {
+                                    return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required ' + ('in `' + componentName + '`, but its value is `null`.'));
+                                }
+                                return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required in ' + ('`' + componentName + '`, but its value is `undefined`.'));
+                            }
+                            return null;
+                        } else {
+                            return validate(props, propName, componentName, location, propFullName);
+                        }
+                    }
+
+                    var chainedCheckType = checkType.bind(null, false);
+                    chainedCheckType.isRequired = checkType.bind(null, true);
+
+                    return chainedCheckType;
+                }
+
+                function createPrimitiveTypeChecker(expectedType) {
+                    function validate(props, propName, componentName, location, propFullName, secret) {
+                        var propValue = props[propName];
+                        var propType = getPropType(propValue);
+                        if (propType !== expectedType) {
+                            // `propValue` being instance of, say, date/regexp, pass the 'object'
+                            // check, but we can offer a more precise error message here rather than
+                            // 'of type `object`'.
+                            var preciseType = getPreciseType(propValue);
+
+                            return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'));
+                        }
+                        return null;
+                    }
+                    return createChainableTypeChecker(validate);
+                }
+
+                function createAnyTypeChecker() {
+                    return createChainableTypeChecker(emptyFunction.thatReturnsNull);
+                }
+
+                function createArrayOfTypeChecker(typeChecker) {
+                    function validate(props, propName, componentName, location, propFullName) {
+                        if (typeof typeChecker !== 'function') {
+                            return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside arrayOf.');
+                        }
+                        var propValue = props[propName];
+                        if (!Array.isArray(propValue)) {
+                            var propType = getPropType(propValue);
+                            return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an array.'));
+                        }
+                        for (var i = 0; i < propValue.length; i++) {
+                            var error = typeChecker(propValue, i, componentName, location, propFullName + '[' + i + ']', ReactPropTypesSecret);
+                            if (error instanceof Error) {
+                                return error;
+                            }
+                        }
+                        return null;
+                    }
+                    return createChainableTypeChecker(validate);
+                }
+
+                function createElementTypeChecker() {
+                    function validate(props, propName, componentName, location, propFullName) {
+                        var propValue = props[propName];
+                        if (!isValidElement(propValue)) {
+                            var propType = getPropType(propValue);
+                            return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement.'));
+                        }
+                        return null;
+                    }
+                    return createChainableTypeChecker(validate);
+                }
+
+                function createInstanceTypeChecker(expectedClass) {
+                    function validate(props, propName, componentName, location, propFullName) {
+                        if (!(props[propName] instanceof expectedClass)) {
+                            var expectedClassName = expectedClass.name || ANONYMOUS;
+                            var actualClassName = getClassName(props[propName]);
+                            return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + actualClassName + '` supplied to `' + componentName + '`, expected ') + ('instance of `' + expectedClassName + '`.'));
+                        }
+                        return null;
+                    }
+                    return createChainableTypeChecker(validate);
+                }
+
+                function createEnumTypeChecker(expectedValues) {
+                    if (!Array.isArray(expectedValues)) {
+                        process.env.NODE_ENV !== 'production' ? warning(false, 'Invalid argument supplied to oneOf, expected an instance of array.') : void 0;
+                        return emptyFunction.thatReturnsNull;
+                    }
+
+                    function validate(props, propName, componentName, location, propFullName) {
+                        var propValue = props[propName];
+                        for (var i = 0; i < expectedValues.length; i++) {
+                            if (is(propValue, expectedValues[i])) {
+                                return null;
+                            }
+                        }
+
+                        var valuesString = JSON.stringify(expectedValues);
+                        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of value `' + propValue + '` ' + ('supplied to `' + componentName + '`, expected one of ' + valuesString + '.'));
+                    }
+                    return createChainableTypeChecker(validate);
+                }
+
+                function createObjectOfTypeChecker(typeChecker) {
+                    function validate(props, propName, componentName, location, propFullName) {
+                        if (typeof typeChecker !== 'function') {
+                            return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside objectOf.');
+                        }
+                        var propValue = props[propName];
+                        var propType = getPropType(propValue);
+                        if (propType !== 'object') {
+                            return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an object.'));
+                        }
+                        for (var key in propValue) {
+                            if (propValue.hasOwnProperty(key)) {
+                                var error = typeChecker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+                                if (error instanceof Error) {
+                                    return error;
+                                }
+                            }
+                        }
+                        return null;
+                    }
+                    return createChainableTypeChecker(validate);
+                }
+
+                function createUnionTypeChecker(arrayOfTypeCheckers) {
+                    if (!Array.isArray(arrayOfTypeCheckers)) {
+                        process.env.NODE_ENV !== 'production' ? warning(false, 'Invalid argument supplied to oneOfType, expected an instance of array.') : void 0;
+                        return emptyFunction.thatReturnsNull;
+                    }
+
+                    function validate(props, propName, componentName, location, propFullName) {
+                        for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
+                            var checker = arrayOfTypeCheckers[i];
+                            if (checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret) == null) {
+                                return null;
+                            }
+                        }
+
+                        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`.'));
+                    }
+                    return createChainableTypeChecker(validate);
+                }
+
+                function createNodeChecker() {
+                    function validate(props, propName, componentName, location, propFullName) {
+                        if (!isNode(props[propName])) {
+                            return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`, expected a ReactNode.'));
+                        }
+                        return null;
+                    }
+                    return createChainableTypeChecker(validate);
+                }
+
+                function createShapeTypeChecker(shapeTypes) {
+                    function validate(props, propName, componentName, location, propFullName) {
+                        var propValue = props[propName];
+                        var propType = getPropType(propValue);
+                        if (propType !== 'object') {
+                            return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
+                        }
+                        for (var key in shapeTypes) {
+                            var checker = shapeTypes[key];
+                            if (!checker) {
+                                continue;
+                            }
+                            var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+                            if (error) {
+                                return error;
+                            }
+                        }
+                        return null;
+                    }
+                    return createChainableTypeChecker(validate);
+                }
+
+                function isNode(propValue) {
+                    switch (typeof propValue) {
+                        case 'number':
+                        case 'string':
+                        case 'undefined':
+                            return true;
+                        case 'boolean':
+                            return !propValue;
+                        case 'object':
+                            if (Array.isArray(propValue)) {
+                                return propValue.every(isNode);
+                            }
+                            if (propValue === null || isValidElement(propValue)) {
+                                return true;
+                            }
+
+                            var iteratorFn = getIteratorFn(propValue);
+                            if (iteratorFn) {
+                                var iterator = iteratorFn.call(propValue);
+                                var step;
+                                if (iteratorFn !== propValue.entries) {
+                                    while (!(step = iterator.next()).done) {
+                                        if (!isNode(step.value)) {
+                                            return false;
+                                        }
+                                    }
+                                } else {
+                                    // Iterator will provide entry [k,v] tuples rather than values.
+                                    while (!(step = iterator.next()).done) {
+                                        var entry = step.value;
+                                        if (entry) {
+                                            if (!isNode(entry[1])) {
+                                                return false;
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                return false;
+                            }
+
+                            return true;
+                        default:
+                            return false;
+                    }
+                }
+
+                function isSymbol(propType, propValue) {
+                    // Native Symbol.
+                    if (propType === 'symbol') {
+                        return true;
+                    }
+
+                    // 19.4.3.5 Symbol.prototype[@@toStringTag] === 'Symbol'
+                    if (propValue['@@toStringTag'] === 'Symbol') {
+                        return true;
+                    }
+
+                    // Fallback for non-spec compliant Symbols which are polyfilled.
+                    if (typeof Symbol === 'function' && propValue instanceof Symbol) {
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                // Equivalent of `typeof` but with special handling for array and regexp.
+                function getPropType(propValue) {
+                    var propType = typeof propValue;
+                    if (Array.isArray(propValue)) {
+                        return 'array';
+                    }
+                    if (propValue instanceof RegExp) {
+                        // Old webkits (at least until Android 4.0) return 'function' rather than
+                        // 'object' for typeof a RegExp. We'll normalize this here so that /bla/
+                        // passes PropTypes.object.
+                        return 'object';
+                    }
+                    if (isSymbol(propType, propValue)) {
+                        return 'symbol';
+                    }
+                    return propType;
+                }
+
+                // This handles more types than `getPropType`. Only used for error messages.
+                // See `createPrimitiveTypeChecker`.
+                function getPreciseType(propValue) {
+                    var propType = getPropType(propValue);
+                    if (propType === 'object') {
+                        if (propValue instanceof Date) {
+                            return 'date';
+                        } else if (propValue instanceof RegExp) {
+                            return 'regexp';
+                        }
+                    }
+                    return propType;
+                }
+
+                // Returns class name of the object, if any.
+                function getClassName(propValue) {
+                    if (!propValue.constructor || !propValue.constructor.name) {
+                        return ANONYMOUS;
+                    }
+                    return propValue.constructor.name;
+                }
+
+                ReactPropTypes.checkPropTypes = checkPropTypes;
+                ReactPropTypes.PropTypes = ReactPropTypes;
+
+                return ReactPropTypes;
+            };
+
+        }).call(this, require('_process'))
+    }, {
+        "./checkPropTypes": 57,
+        "./lib/ReactPropTypesSecret": 60,
+        "_process": 56,
+        "fbjs/lib/emptyFunction": 21,
+        "fbjs/lib/invariant": 29,
+        "fbjs/lib/warning": 36
+    }],
+    60: [function(require, module, exports) {
+        /**
+         * Copyright 2013-present, Facebook, Inc.
+         * All rights reserved.
+         *
+         * This source code is licensed under the BSD-style license found in the
+         * LICENSE file in the root directory of this source tree. An additional grant
+         * of patent rights can be found in the PATENTS file in the same directory.
+         */
+
+        'use strict';
+
+        var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
+
+        module.exports = ReactPropTypesSecret;
+
+    }, {}],
+    61: [function(require, module, exports) {
+        module.exports = require('react/lib/ReactCSSTransitionGroup');
+    }, {
+        "react/lib/ReactCSSTransitionGroup": 217
+    }],
+    62: [function(require, module, exports) {
         'use strict';
 
         module.exports = require('./lib/ReactDOM');
 
     }, {
-        "./lib/ReactDOM": 89
+        "./lib/ReactDOM": 93
     }],
-    59: [function(require, module, exports) {
+    63: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -4717,7 +5321,7 @@
 
         module.exports = ARIADOMPropertyConfig;
     }, {}],
-    60: [function(require, module, exports) {
+    64: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -4742,10 +5346,10 @@
 
         module.exports = AutoFocusUtils;
     }, {
-        "./ReactDOMComponentTree": 92,
+        "./ReactDOMComponentTree": 96,
         "fbjs/lib/focusNode": 23
     }],
-    61: [function(require, module, exports) {
+    65: [function(require, module, exports) {
         /**
          * Copyright 2013-present Facebook, Inc.
          * All rights reserved.
@@ -5131,13 +5735,13 @@
 
         module.exports = BeforeInputEventPlugin;
     }, {
-        "./EventPropagators": 78,
-        "./FallbackCompositionState": 79,
-        "./SyntheticCompositionEvent": 146,
-        "./SyntheticInputEvent": 150,
+        "./EventPropagators": 82,
+        "./FallbackCompositionState": 83,
+        "./SyntheticCompositionEvent": 150,
+        "./SyntheticInputEvent": 154,
         "fbjs/lib/ExecutionEnvironment": 15
     }],
-    62: [function(require, module, exports) {
+    66: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -5286,7 +5890,7 @@
 
         module.exports = CSSProperty;
     }, {}],
-    63: [function(require, module, exports) {
+    67: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -5496,16 +6100,16 @@
 
         module.exports = CSSPropertyOperations;
     }, {
-        "./CSSProperty": 62,
-        "./ReactInstrumentation": 121,
-        "./dangerousStyleValue": 163,
+        "./CSSProperty": 66,
+        "./ReactInstrumentation": 125,
+        "./dangerousStyleValue": 167,
         "fbjs/lib/ExecutionEnvironment": 15,
         "fbjs/lib/camelizeStyleName": 17,
         "fbjs/lib/hyphenateStyleName": 28,
         "fbjs/lib/memoizeStringOnly": 32,
         "fbjs/lib/warning": 36
     }],
-    64: [function(require, module, exports) {
+    68: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -5629,11 +6233,11 @@
 
         module.exports = PooledClass.addPoolingTo(CallbackQueue);
     }, {
-        "./PooledClass": 83,
-        "./reactProdInvariant": 182,
+        "./PooledClass": 87,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29
     }],
-    65: [function(require, module, exports) {
+    69: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -5902,6 +6506,26 @@
             }
         }
 
+        function handleControlledInputBlur(inst, node) {
+            // TODO: In IE, inst is occasionally null. Why?
+            if (inst == null) {
+                return;
+            }
+
+            // Fiber and ReactDOM keep wrapper state in separate places
+            var state = inst._wrapperState || node._wrapperState;
+
+            if (!state || !state.controlled || node.type !== 'number') {
+                return;
+            }
+
+            // If controlled, assign the value attribute to the current value on blur
+            var value = '' + node.value;
+            if (node.getAttribute('value') !== value) {
+                node.setAttribute('value', value);
+            }
+        }
+
         /**
          * This plugin creates an `onChange` event that normalizes change events
          * across form elements. This event fires at a time when it's possible to
@@ -5950,23 +6574,28 @@
                 if (handleEventFunc) {
                     handleEventFunc(topLevelType, targetNode, targetInst);
                 }
+
+                // When blurring, set the value attribute for number inputs
+                if (topLevelType === 'topBlur') {
+                    handleControlledInputBlur(targetInst, targetNode);
+                }
             }
 
         };
 
         module.exports = ChangeEventPlugin;
     }, {
-        "./EventPluginHub": 75,
-        "./EventPropagators": 78,
-        "./ReactDOMComponentTree": 92,
-        "./ReactUpdates": 139,
-        "./SyntheticEvent": 148,
-        "./getEventTarget": 171,
-        "./isEventSupported": 179,
-        "./isTextInputElement": 180,
+        "./EventPluginHub": 79,
+        "./EventPropagators": 82,
+        "./ReactDOMComponentTree": 96,
+        "./ReactUpdates": 143,
+        "./SyntheticEvent": 152,
+        "./getEventTarget": 175,
+        "./isEventSupported": 182,
+        "./isTextInputElement": 183,
         "fbjs/lib/ExecutionEnvironment": 15
     }],
-    66: [function(require, module, exports) {
+    70: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -6200,15 +6829,15 @@
 
         module.exports = DOMChildrenOperations;
     }, {
-        "./DOMLazyTree": 67,
-        "./Danger": 71,
-        "./ReactDOMComponentTree": 92,
-        "./ReactInstrumentation": 121,
-        "./createMicrosoftUnsafeLocalFunction": 162,
-        "./setInnerHTML": 184,
-        "./setTextContent": 185
+        "./DOMLazyTree": 71,
+        "./Danger": 75,
+        "./ReactDOMComponentTree": 96,
+        "./ReactInstrumentation": 125,
+        "./createMicrosoftUnsafeLocalFunction": 166,
+        "./setInnerHTML": 187,
+        "./setTextContent": 188
     }],
-    67: [function(require, module, exports) {
+    71: [function(require, module, exports) {
         /**
          * Copyright 2015-present, Facebook, Inc.
          * All rights reserved.
@@ -6327,12 +6956,12 @@
 
         module.exports = DOMLazyTree;
     }, {
-        "./DOMNamespaces": 68,
-        "./createMicrosoftUnsafeLocalFunction": 162,
-        "./setInnerHTML": 184,
-        "./setTextContent": 185
+        "./DOMNamespaces": 72,
+        "./createMicrosoftUnsafeLocalFunction": 166,
+        "./setInnerHTML": 187,
+        "./setTextContent": 188
     }],
-    68: [function(require, module, exports) {
+    72: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -6353,7 +6982,7 @@
 
         module.exports = DOMNamespaces;
     }, {}],
-    69: [function(require, module, exports) {
+    73: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -6566,10 +7195,10 @@
 
         module.exports = DOMProperty;
     }, {
-        "./reactProdInvariant": 182,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29
     }],
-    70: [function(require, module, exports) {
+    74: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -6807,13 +7436,13 @@
 
         module.exports = DOMPropertyOperations;
     }, {
-        "./DOMProperty": 69,
-        "./ReactDOMComponentTree": 92,
-        "./ReactInstrumentation": 121,
-        "./quoteAttributeValueForBrowser": 181,
+        "./DOMProperty": 73,
+        "./ReactDOMComponentTree": 96,
+        "./ReactInstrumentation": 125,
+        "./quoteAttributeValueForBrowser": 184,
         "fbjs/lib/warning": 36
     }],
-    71: [function(require, module, exports) {
+    75: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -6862,14 +7491,14 @@
 
         module.exports = Danger;
     }, {
-        "./DOMLazyTree": 67,
-        "./reactProdInvariant": 182,
+        "./DOMLazyTree": 71,
+        "./reactProdInvariant": 185,
         "fbjs/lib/ExecutionEnvironment": 15,
         "fbjs/lib/createNodesFromMarkup": 20,
         "fbjs/lib/emptyFunction": 21,
         "fbjs/lib/invariant": 29
     }],
-    72: [function(require, module, exports) {
+    76: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -6896,7 +7525,7 @@
 
         module.exports = DefaultEventPluginOrder;
     }, {}],
-    73: [function(require, module, exports) {
+    77: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -6997,11 +7626,11 @@
 
         module.exports = EnterLeaveEventPlugin;
     }, {
-        "./EventPropagators": 78,
-        "./ReactDOMComponentTree": 92,
-        "./SyntheticMouseEvent": 152
+        "./EventPropagators": 82,
+        "./ReactDOMComponentTree": 96,
+        "./SyntheticMouseEvent": 156
     }],
-    74: [function(require, module, exports) {
+    78: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -7094,7 +7723,7 @@
 
         module.exports = EventConstants;
     }, {}],
-    75: [function(require, module, exports) {
+    79: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -7372,15 +8001,15 @@
 
         module.exports = EventPluginHub;
     }, {
-        "./EventPluginRegistry": 76,
-        "./EventPluginUtils": 77,
-        "./ReactErrorUtils": 112,
-        "./accumulateInto": 159,
-        "./forEachAccumulated": 167,
-        "./reactProdInvariant": 182,
+        "./EventPluginRegistry": 80,
+        "./EventPluginUtils": 81,
+        "./ReactErrorUtils": 116,
+        "./accumulateInto": 163,
+        "./forEachAccumulated": 171,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29
     }],
-    76: [function(require, module, exports) {
+    80: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -7635,10 +8264,10 @@
 
         module.exports = EventPluginRegistry;
     }, {
-        "./reactProdInvariant": 182,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29
     }],
-    77: [function(require, module, exports) {
+    81: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -7866,12 +8495,12 @@
 
         module.exports = EventPluginUtils;
     }, {
-        "./ReactErrorUtils": 112,
-        "./reactProdInvariant": 182,
+        "./ReactErrorUtils": 116,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/warning": 36
     }],
-    78: [function(require, module, exports) {
+    82: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -8006,13 +8635,13 @@
 
         module.exports = EventPropagators;
     }, {
-        "./EventPluginHub": 75,
-        "./EventPluginUtils": 77,
-        "./accumulateInto": 159,
-        "./forEachAccumulated": 167,
+        "./EventPluginHub": 79,
+        "./EventPluginUtils": 81,
+        "./accumulateInto": 163,
+        "./forEachAccumulated": 171,
         "fbjs/lib/warning": 36
     }],
-    79: [function(require, module, exports) {
+    83: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -8108,11 +8737,11 @@
 
         module.exports = FallbackCompositionState;
     }, {
-        "./PooledClass": 83,
-        "./getTextContentAccessor": 176,
+        "./PooledClass": 87,
+        "./getTextContentAccessor": 179,
         "object-assign": 55
     }],
-    80: [function(require, module, exports) {
+    84: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -8320,14 +8949,38 @@
                 htmlFor: 'for',
                 httpEquiv: 'http-equiv'
             },
-            DOMPropertyNames: {}
+            DOMPropertyNames: {},
+            DOMMutationMethods: {
+                value: function(node, value) {
+                    if (value == null) {
+                        return node.removeAttribute('value');
+                    }
+
+                    // Number inputs get special treatment due to some edge cases in
+                    // Chrome. Let everything else assign the value attribute as normal.
+                    // https://github.com/facebook/react/issues/7253#issuecomment-236074326
+                    if (node.type !== 'number' || node.hasAttribute('value') === false) {
+                        node.setAttribute('value', '' + value);
+                    } else if (node.validity && !node.validity.badInput && node.ownerDocument.activeElement !== node) {
+                        // Don't assign an attribute if validation reports bad
+                        // input. Chrome will clear the value. Additionally, don't
+                        // operate on inputs that have focus, otherwise Chrome might
+                        // strip off trailing decimal places and cause the user's
+                        // cursor position to jump to the beginning of the input.
+                        //
+                        // In ReactDOMInput, we have an onBlur event that will trigger
+                        // this function again when focus is lost.
+                        node.setAttribute('value', '' + value);
+                    }
+                }
+            }
         };
 
         module.exports = HTMLDOMPropertyConfig;
     }, {
-        "./DOMProperty": 69
+        "./DOMProperty": 73
     }],
-    81: [function(require, module, exports) {
+    85: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -8387,7 +9040,7 @@
 
         module.exports = KeyEscapeUtils;
     }, {}],
-    82: [function(require, module, exports) {
+    86: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -8402,8 +9055,11 @@
 
         var _prodInvariant = require('./reactProdInvariant');
 
-        var React = require('react/lib/React');
         var ReactPropTypesSecret = require('./ReactPropTypesSecret');
+        var propTypesFactory = require('prop-types/factory');
+
+        var React = require('react/lib/React');
+        var PropTypes = propTypesFactory(React.isValidElement);
 
         var invariant = require('fbjs/lib/invariant');
         var warning = require('fbjs/lib/warning');
@@ -8445,7 +9101,7 @@
                 }
                 return new Error('You provided a `checked` prop to a form field without an ' + '`onChange` handler. This will render a read-only field. If ' + 'the field should be mutable use `defaultChecked`. Otherwise, ' + 'set either `onChange` or `readOnly`.');
             },
-            onChange: React.PropTypes.func
+            onChange: PropTypes.func
         };
 
         var loggedTypeFailures = {};
@@ -8525,13 +9181,14 @@
 
         module.exports = LinkedValueUtils;
     }, {
-        "./ReactPropTypesSecret": 130,
-        "./reactProdInvariant": 182,
+        "./ReactPropTypesSecret": 134,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/warning": 36,
-        "react/lib/React": 212
+        "prop-types/factory": 58,
+        "react/lib/React": 215
     }],
-    83: [function(require, module, exports) {
+    87: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -8644,10 +9301,10 @@
 
         module.exports = PooledClass;
     }, {
-        "./reactProdInvariant": 182,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29
     }],
-    84: [function(require, module, exports) {
+    88: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -8976,14 +9633,14 @@
 
         module.exports = ReactBrowserEventEmitter;
     }, {
-        "./EventPluginRegistry": 76,
-        "./ReactEventEmitterMixin": 113,
-        "./ViewportMetrics": 158,
-        "./getVendorPrefixedEventName": 177,
-        "./isEventSupported": 179,
+        "./EventPluginRegistry": 80,
+        "./ReactEventEmitterMixin": 117,
+        "./ViewportMetrics": 162,
+        "./getVendorPrefixedEventName": 180,
+        "./isEventSupported": 182,
         "object-assign": 55
     }],
-    85: [function(require, module, exports) {
+    89: [function(require, module, exports) {
         (function(process) {
             /**
              * Copyright 2014-present, Facebook, Inc.
@@ -9140,16 +9797,16 @@
             module.exports = ReactChildReconciler;
         }).call(this, require('_process'))
     }, {
-        "./KeyEscapeUtils": 81,
-        "./ReactReconciler": 132,
-        "./instantiateReactComponent": 178,
-        "./shouldUpdateReactComponent": 186,
-        "./traverseAllChildren": 187,
+        "./KeyEscapeUtils": 85,
+        "./ReactReconciler": 136,
+        "./instantiateReactComponent": 181,
+        "./shouldUpdateReactComponent": 189,
+        "./traverseAllChildren": 190,
         "_process": 56,
         "fbjs/lib/warning": 36,
-        "react/lib/ReactComponentTreeHook": 219
+        "react/lib/ReactComponentTreeHook": 222
     }],
-    86: [function(require, module, exports) {
+    90: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -9180,10 +9837,10 @@
 
         module.exports = ReactComponentBrowserEnvironment;
     }, {
-        "./DOMChildrenOperations": 66,
-        "./ReactDOMIDOperations": 96
+        "./DOMChildrenOperations": 70,
+        "./ReactDOMIDOperations": 100
     }],
-    87: [function(require, module, exports) {
+    91: [function(require, module, exports) {
         /**
          * Copyright 2014-present, Facebook, Inc.
          * All rights reserved.
@@ -9230,10 +9887,10 @@
 
         module.exports = ReactComponentEnvironment;
     }, {
-        "./reactProdInvariant": 182,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29
     }],
-    88: [function(require, module, exports) {
+    92: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -9748,7 +10405,7 @@
                 if (childContext) {
                     !(typeof Component.childContextTypes === 'object') ? "dev" !== 'production' ? invariant(false, '%s.getChildContext(): childContextTypes must be defined in order to use getChildContext().', this.getName() || 'ReactCompositeComponent'): _prodInvariant('107', this.getName() || 'ReactCompositeComponent'): void 0;
                     if ("dev" !== 'production') {
-                        this._checkContextTypes(Component.childContextTypes, childContext, 'childContext');
+                        this._checkContextTypes(Component.childContextTypes, childContext, 'child context');
                     }
                     for (var name in childContext) {
                         !(name in Component.childContextTypes) ? "dev" !== 'production' ? invariant(false, '%s.getChildContext(): key "%s" is not defined in childContextTypes.', this.getName() || 'ReactCompositeComponent', name): _prodInvariant('108', this.getName() || 'ReactCompositeComponent', name): void 0;
@@ -10132,24 +10789,24 @@
 
         module.exports = ReactCompositeComponent;
     }, {
-        "./ReactComponentEnvironment": 87,
-        "./ReactErrorUtils": 112,
-        "./ReactInstanceMap": 120,
-        "./ReactInstrumentation": 121,
-        "./ReactNodeTypes": 126,
-        "./ReactReconciler": 132,
-        "./checkReactTypeSpec": 161,
-        "./reactProdInvariant": 182,
-        "./shouldUpdateReactComponent": 186,
+        "./ReactComponentEnvironment": 91,
+        "./ReactErrorUtils": 116,
+        "./ReactInstanceMap": 124,
+        "./ReactInstrumentation": 125,
+        "./ReactNodeTypes": 130,
+        "./ReactReconciler": 136,
+        "./checkReactTypeSpec": 165,
+        "./reactProdInvariant": 185,
+        "./shouldUpdateReactComponent": 189,
         "fbjs/lib/emptyObject": 22,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/shallowEqual": 35,
         "fbjs/lib/warning": 36,
         "object-assign": 55,
-        "react/lib/React": 212,
-        "react/lib/ReactCurrentOwner": 220
+        "react/lib/React": 215,
+        "react/lib/ReactCurrentOwner": 223
     }],
-    89: [function(require, module, exports) {
+    93: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -10262,23 +10919,23 @@
 
         module.exports = ReactDOM;
     }, {
-        "./ReactDOMComponentTree": 92,
-        "./ReactDOMInvalidARIAHook": 98,
-        "./ReactDOMNullInputValuePropHook": 99,
-        "./ReactDOMUnknownPropertyHook": 106,
-        "./ReactDefaultInjection": 109,
-        "./ReactInstrumentation": 121,
-        "./ReactMount": 124,
-        "./ReactReconciler": 132,
-        "./ReactUpdates": 139,
-        "./ReactVersion": 140,
-        "./findDOMNode": 165,
-        "./getHostComponentFromComposite": 172,
-        "./renderSubtreeIntoContainer": 183,
+        "./ReactDOMComponentTree": 96,
+        "./ReactDOMInvalidARIAHook": 102,
+        "./ReactDOMNullInputValuePropHook": 103,
+        "./ReactDOMUnknownPropertyHook": 110,
+        "./ReactDefaultInjection": 113,
+        "./ReactInstrumentation": 125,
+        "./ReactMount": 128,
+        "./ReactReconciler": 136,
+        "./ReactUpdates": 143,
+        "./ReactVersion": 144,
+        "./findDOMNode": 169,
+        "./getHostComponentFromComposite": 176,
+        "./renderSubtreeIntoContainer": 186,
         "fbjs/lib/ExecutionEnvironment": 15,
         "fbjs/lib/warning": 36
     }],
-    90: [function(require, module, exports) {
+    94: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -11282,35 +11939,35 @@
 
         module.exports = ReactDOMComponent;
     }, {
-        "./AutoFocusUtils": 60,
-        "./CSSPropertyOperations": 63,
-        "./DOMLazyTree": 67,
-        "./DOMNamespaces": 68,
-        "./DOMProperty": 69,
-        "./DOMPropertyOperations": 70,
-        "./EventPluginHub": 75,
-        "./EventPluginRegistry": 76,
-        "./ReactBrowserEventEmitter": 84,
-        "./ReactDOMComponentFlags": 91,
-        "./ReactDOMComponentTree": 92,
-        "./ReactDOMInput": 97,
-        "./ReactDOMOption": 100,
-        "./ReactDOMSelect": 101,
-        "./ReactDOMTextarea": 104,
-        "./ReactInstrumentation": 121,
-        "./ReactMultiChild": 125,
-        "./ReactServerRenderingTransaction": 134,
-        "./escapeTextContentForBrowser": 164,
-        "./isEventSupported": 179,
-        "./reactProdInvariant": 182,
-        "./validateDOMNesting": 188,
+        "./AutoFocusUtils": 64,
+        "./CSSPropertyOperations": 67,
+        "./DOMLazyTree": 71,
+        "./DOMNamespaces": 72,
+        "./DOMProperty": 73,
+        "./DOMPropertyOperations": 74,
+        "./EventPluginHub": 79,
+        "./EventPluginRegistry": 80,
+        "./ReactBrowserEventEmitter": 88,
+        "./ReactDOMComponentFlags": 95,
+        "./ReactDOMComponentTree": 96,
+        "./ReactDOMInput": 101,
+        "./ReactDOMOption": 104,
+        "./ReactDOMSelect": 105,
+        "./ReactDOMTextarea": 108,
+        "./ReactInstrumentation": 125,
+        "./ReactMultiChild": 129,
+        "./ReactServerRenderingTransaction": 138,
+        "./escapeTextContentForBrowser": 168,
+        "./isEventSupported": 182,
+        "./reactProdInvariant": 185,
+        "./validateDOMNesting": 191,
         "fbjs/lib/emptyFunction": 21,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/shallowEqual": 35,
         "fbjs/lib/warning": 36,
         "object-assign": 55
     }],
-    91: [function(require, module, exports) {
+    95: [function(require, module, exports) {
         /**
          * Copyright 2015-present, Facebook, Inc.
          * All rights reserved.
@@ -11329,7 +11986,7 @@
 
         module.exports = ReactDOMComponentFlags;
     }, {}],
-    92: [function(require, module, exports) {
+    96: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -11525,12 +12182,12 @@
 
         module.exports = ReactDOMComponentTree;
     }, {
-        "./DOMProperty": 69,
-        "./ReactDOMComponentFlags": 91,
-        "./reactProdInvariant": 182,
+        "./DOMProperty": 73,
+        "./ReactDOMComponentFlags": 95,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29
     }],
-    93: [function(require, module, exports) {
+    97: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -11564,9 +12221,9 @@
 
         module.exports = ReactDOMContainerInfo;
     }, {
-        "./validateDOMNesting": 188
+        "./validateDOMNesting": 191
     }],
-    94: [function(require, module, exports) {
+    98: [function(require, module, exports) {
         /**
          * Copyright 2014-present, Facebook, Inc.
          * All rights reserved.
@@ -11627,11 +12284,11 @@
 
         module.exports = ReactDOMEmptyComponent;
     }, {
-        "./DOMLazyTree": 67,
-        "./ReactDOMComponentTree": 92,
+        "./DOMLazyTree": 71,
+        "./ReactDOMComponentTree": 96,
         "object-assign": 55
     }],
-    95: [function(require, module, exports) {
+    99: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -11651,7 +12308,7 @@
 
         module.exports = ReactDOMFeatureFlags;
     }, {}],
-    96: [function(require, module, exports) {
+    100: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -11686,10 +12343,10 @@
 
         module.exports = ReactDOMIDOperations;
     }, {
-        "./DOMChildrenOperations": 66,
-        "./ReactDOMComponentTree": 92
+        "./DOMChildrenOperations": 70,
+        "./ReactDOMComponentTree": 96
     }],
-    97: [function(require, module, exports) {
+    101: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -11804,12 +12461,9 @@
                     initialChecked: props.checked != null ? props.checked : props.defaultChecked,
                     initialValue: props.value != null ? props.value : defaultValue,
                     listeners: null,
-                    onChange: _handleChange.bind(inst)
+                    onChange: _handleChange.bind(inst),
+                    controlled: isControlled(props)
                 };
-
-                if ("dev" !== 'production') {
-                    inst._wrapperState.controlled = isControlled(props);
-                }
             },
 
             updateWrapper: function(inst) {
@@ -11838,14 +12492,24 @@
                 var node = ReactDOMComponentTree.getNodeFromInstance(inst);
                 var value = LinkedValueUtils.getValue(props);
                 if (value != null) {
+                    if (value === 0 && node.value === '') {
+                        node.value = '0';
+                        // Note: IE9 reports a number inputs as 'text', so check props instead.
+                    } else if (props.type === 'number') {
+                        // Simulate `input.valueAsNumber`. IE9 does not support it
+                        var valueAsNumber = parseFloat(node.value, 10) || 0;
 
-                    // Cast `value` to a string to ensure the value is set correctly. While
-                    // browsers typically do this as necessary, jsdom doesn't.
-                    var newValue = '' + value;
-
-                    // To avoid side effects (such as losing text selection), only set value if changed
-                    if (newValue !== node.value) {
-                        node.value = newValue;
+                        // eslint-disable-next-line
+                        if (value != valueAsNumber) {
+                            // Cast `value` to a string to ensure the value is set correctly. While
+                            // browsers typically do this as necessary, jsdom doesn't.
+                            node.value = '' + value;
+                        }
+                        // eslint-disable-next-line
+                    } else if (value != node.value) {
+                        // Cast `value` to a string to ensure the value is set correctly. While
+                        // browsers typically do this as necessary, jsdom doesn't.
+                        node.value = '' + value;
                     }
                 } else {
                     if (props.value == null && props.defaultValue != null) {
@@ -11968,16 +12632,16 @@
 
         module.exports = ReactDOMInput;
     }, {
-        "./DOMPropertyOperations": 70,
-        "./LinkedValueUtils": 82,
-        "./ReactDOMComponentTree": 92,
-        "./ReactUpdates": 139,
-        "./reactProdInvariant": 182,
+        "./DOMPropertyOperations": 74,
+        "./LinkedValueUtils": 86,
+        "./ReactDOMComponentTree": 96,
+        "./ReactUpdates": 143,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/warning": 36,
         "object-assign": 55
     }],
-    98: [function(require, module, exports) {
+    102: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -12071,11 +12735,11 @@
 
         module.exports = ReactDOMInvalidARIAHook;
     }, {
-        "./DOMProperty": 69,
+        "./DOMProperty": 73,
         "fbjs/lib/warning": 36,
-        "react/lib/ReactComponentTreeHook": 219
+        "react/lib/ReactComponentTreeHook": 222
     }],
-    99: [function(require, module, exports) {
+    103: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -12120,9 +12784,9 @@
         module.exports = ReactDOMNullInputValuePropHook;
     }, {
         "fbjs/lib/warning": 36,
-        "react/lib/ReactComponentTreeHook": 219
+        "react/lib/ReactComponentTreeHook": 222
     }],
-    100: [function(require, module, exports) {
+    104: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -12251,13 +12915,13 @@
 
         module.exports = ReactDOMOption;
     }, {
-        "./ReactDOMComponentTree": 92,
-        "./ReactDOMSelect": 101,
+        "./ReactDOMComponentTree": 96,
+        "./ReactDOMSelect": 105,
         "fbjs/lib/warning": 36,
         "object-assign": 55,
-        "react/lib/React": 212
+        "react/lib/React": 215
     }],
-    101: [function(require, module, exports) {
+    105: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -12458,13 +13122,13 @@
 
         module.exports = ReactDOMSelect;
     }, {
-        "./LinkedValueUtils": 82,
-        "./ReactDOMComponentTree": 92,
-        "./ReactUpdates": 139,
+        "./LinkedValueUtils": 86,
+        "./ReactDOMComponentTree": 96,
+        "./ReactUpdates": 143,
         "fbjs/lib/warning": 36,
         "object-assign": 55
     }],
-    102: [function(require, module, exports) {
+    106: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -12677,11 +13341,11 @@
 
         module.exports = ReactDOMSelection;
     }, {
-        "./getNodeForCharacterOffset": 175,
-        "./getTextContentAccessor": 176,
+        "./getNodeForCharacterOffset": 178,
+        "./getTextContentAccessor": 179,
         "fbjs/lib/ExecutionEnvironment": 15
     }],
-    103: [function(require, module, exports) {
+    107: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -12846,16 +13510,16 @@
 
         module.exports = ReactDOMTextComponent;
     }, {
-        "./DOMChildrenOperations": 66,
-        "./DOMLazyTree": 67,
-        "./ReactDOMComponentTree": 92,
-        "./escapeTextContentForBrowser": 164,
-        "./reactProdInvariant": 182,
-        "./validateDOMNesting": 188,
+        "./DOMChildrenOperations": 70,
+        "./DOMLazyTree": 71,
+        "./ReactDOMComponentTree": 96,
+        "./escapeTextContentForBrowser": 168,
+        "./reactProdInvariant": 185,
+        "./validateDOMNesting": 191,
         "fbjs/lib/invariant": 29,
         "object-assign": 55
     }],
-    104: [function(require, module, exports) {
+    108: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -13015,15 +13679,15 @@
 
         module.exports = ReactDOMTextarea;
     }, {
-        "./LinkedValueUtils": 82,
-        "./ReactDOMComponentTree": 92,
-        "./ReactUpdates": 139,
-        "./reactProdInvariant": 182,
+        "./LinkedValueUtils": 86,
+        "./ReactDOMComponentTree": 96,
+        "./ReactUpdates": 143,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/warning": 36,
         "object-assign": 55
     }],
-    105: [function(require, module, exports) {
+    109: [function(require, module, exports) {
         /**
          * Copyright 2015-present, Facebook, Inc.
          * All rights reserved.
@@ -13160,10 +13824,10 @@
             traverseEnterLeave: traverseEnterLeave
         };
     }, {
-        "./reactProdInvariant": 182,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29
     }],
-    106: [function(require, module, exports) {
+    110: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -13276,12 +13940,12 @@
 
         module.exports = ReactDOMUnknownPropertyHook;
     }, {
-        "./DOMProperty": 69,
-        "./EventPluginRegistry": 76,
+        "./DOMProperty": 73,
+        "./EventPluginRegistry": 80,
         "fbjs/lib/warning": 36,
-        "react/lib/ReactComponentTreeHook": 219
+        "react/lib/ReactComponentTreeHook": 222
     }],
-    107: [function(require, module, exports) {
+    111: [function(require, module, exports) {
         /**
          * Copyright 2016-present, Facebook, Inc.
          * All rights reserved.
@@ -13462,9 +14126,7 @@
         }
 
         var lastMarkTimeStamp = 0;
-        var canUsePerformanceMeasure =
-            // $FlowFixMe https://github.com/facebook/flow/issues/2345
-            typeof performance !== 'undefined' && typeof performance.mark === 'function' && typeof performance.clearMarks === 'function' && typeof performance.measure === 'function' && typeof performance.clearMeasures === 'function';
+        var canUsePerformanceMeasure = typeof performance !== 'undefined' && typeof performance.mark === 'function' && typeof performance.clearMarks === 'function' && typeof performance.measure === 'function' && typeof performance.clearMeasures === 'function';
 
         function shouldMark(debugID) {
             if (!isProfiling || !canUsePerformanceMeasure) {
@@ -13643,14 +14305,14 @@
 
         module.exports = ReactDebugTool;
     }, {
-        "./ReactHostOperationHistoryHook": 117,
-        "./ReactInvalidSetStateWarningHook": 122,
+        "./ReactHostOperationHistoryHook": 121,
+        "./ReactInvalidSetStateWarningHook": 126,
         "fbjs/lib/ExecutionEnvironment": 15,
         "fbjs/lib/performanceNow": 34,
         "fbjs/lib/warning": 36,
-        "react/lib/ReactComponentTreeHook": 219
+        "react/lib/ReactComponentTreeHook": 222
     }],
-    108: [function(require, module, exports) {
+    112: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -13719,12 +14381,12 @@
 
         module.exports = ReactDefaultBatchingStrategy;
     }, {
-        "./ReactUpdates": 139,
-        "./Transaction": 157,
+        "./ReactUpdates": 143,
+        "./Transaction": 161,
         "fbjs/lib/emptyFunction": 21,
         "object-assign": 55
     }],
-    109: [function(require, module, exports) {
+    113: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -13811,27 +14473,27 @@
             inject: inject
         };
     }, {
-        "./ARIADOMPropertyConfig": 59,
-        "./BeforeInputEventPlugin": 61,
-        "./ChangeEventPlugin": 65,
-        "./DefaultEventPluginOrder": 72,
-        "./EnterLeaveEventPlugin": 73,
-        "./HTMLDOMPropertyConfig": 80,
-        "./ReactComponentBrowserEnvironment": 86,
-        "./ReactDOMComponent": 90,
-        "./ReactDOMComponentTree": 92,
-        "./ReactDOMEmptyComponent": 94,
-        "./ReactDOMTextComponent": 103,
-        "./ReactDOMTreeTraversal": 105,
-        "./ReactDefaultBatchingStrategy": 108,
-        "./ReactEventListener": 114,
-        "./ReactInjection": 118,
-        "./ReactReconcileTransaction": 131,
-        "./SVGDOMPropertyConfig": 141,
-        "./SelectEventPlugin": 142,
-        "./SimpleEventPlugin": 143
+        "./ARIADOMPropertyConfig": 63,
+        "./BeforeInputEventPlugin": 65,
+        "./ChangeEventPlugin": 69,
+        "./DefaultEventPluginOrder": 76,
+        "./EnterLeaveEventPlugin": 77,
+        "./HTMLDOMPropertyConfig": 84,
+        "./ReactComponentBrowserEnvironment": 90,
+        "./ReactDOMComponent": 94,
+        "./ReactDOMComponentTree": 96,
+        "./ReactDOMEmptyComponent": 98,
+        "./ReactDOMTextComponent": 107,
+        "./ReactDOMTreeTraversal": 109,
+        "./ReactDefaultBatchingStrategy": 112,
+        "./ReactEventListener": 118,
+        "./ReactInjection": 122,
+        "./ReactReconcileTransaction": 135,
+        "./SVGDOMPropertyConfig": 145,
+        "./SelectEventPlugin": 146,
+        "./SimpleEventPlugin": 147
     }],
-    110: [function(require, module, exports) {
+    114: [function(require, module, exports) {
         /**
          * Copyright 2014-present, Facebook, Inc.
          * All rights reserved.
@@ -13852,7 +14514,7 @@
 
         module.exports = REACT_ELEMENT_TYPE;
     }, {}],
-    111: [function(require, module, exports) {
+    115: [function(require, module, exports) {
         /**
          * Copyright 2014-present, Facebook, Inc.
          * All rights reserved.
@@ -13883,7 +14545,7 @@
 
         module.exports = ReactEmptyComponent;
     }, {}],
-    112: [function(require, module, exports) {
+    116: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -13951,7 +14613,6 @@
                     var evtType = 'react-' + name;
                     fakeNode.addEventListener(evtType, boundFunc, false);
                     var evt = document.createEvent('Event');
-                    // $FlowFixMe https://github.com/facebook/flow/issues/2336
                     evt.initEvent(evtType, false, false);
                     fakeNode.dispatchEvent(evt);
                     fakeNode.removeEventListener(evtType, boundFunc, false);
@@ -13961,7 +14622,7 @@
 
         module.exports = ReactErrorUtils;
     }, {}],
-    113: [function(require, module, exports) {
+    117: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -13995,9 +14656,9 @@
 
         module.exports = ReactEventEmitterMixin;
     }, {
-        "./EventPluginHub": 75
+        "./EventPluginHub": 79
     }],
-    114: [function(require, module, exports) {
+    118: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -14153,16 +14814,16 @@
 
         module.exports = ReactEventListener;
     }, {
-        "./PooledClass": 83,
-        "./ReactDOMComponentTree": 92,
-        "./ReactUpdates": 139,
-        "./getEventTarget": 171,
+        "./PooledClass": 87,
+        "./ReactDOMComponentTree": 96,
+        "./ReactUpdates": 143,
+        "./getEventTarget": 175,
         "fbjs/lib/EventListener": 14,
         "fbjs/lib/ExecutionEnvironment": 15,
         "fbjs/lib/getUnboundedScrollPosition": 26,
         "object-assign": 55
     }],
-    115: [function(require, module, exports) {
+    119: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -14185,7 +14846,7 @@
 
         module.exports = ReactFeatureFlags;
     }, {}],
-    116: [function(require, module, exports) {
+    120: [function(require, module, exports) {
         /**
          * Copyright 2014-present, Facebook, Inc.
          * All rights reserved.
@@ -14254,10 +14915,10 @@
 
         module.exports = ReactHostComponent;
     }, {
-        "./reactProdInvariant": 182,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29
     }],
-    117: [function(require, module, exports) {
+    121: [function(require, module, exports) {
         /**
          * Copyright 2016-present, Facebook, Inc.
          * All rights reserved.
@@ -14292,7 +14953,7 @@
 
         module.exports = ReactHostOperationHistoryHook;
     }, {}],
-    118: [function(require, module, exports) {
+    122: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -14327,16 +14988,16 @@
 
         module.exports = ReactInjection;
     }, {
-        "./DOMProperty": 69,
-        "./EventPluginHub": 75,
-        "./EventPluginUtils": 77,
-        "./ReactBrowserEventEmitter": 84,
-        "./ReactComponentEnvironment": 87,
-        "./ReactEmptyComponent": 111,
-        "./ReactHostComponent": 116,
-        "./ReactUpdates": 139
+        "./DOMProperty": 73,
+        "./EventPluginHub": 79,
+        "./EventPluginUtils": 81,
+        "./ReactBrowserEventEmitter": 88,
+        "./ReactComponentEnvironment": 91,
+        "./ReactEmptyComponent": 115,
+        "./ReactHostComponent": 120,
+        "./ReactUpdates": 143
     }],
-    119: [function(require, module, exports) {
+    123: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -14464,12 +15125,12 @@
 
         module.exports = ReactInputSelection;
     }, {
-        "./ReactDOMSelection": 102,
+        "./ReactDOMSelection": 106,
         "fbjs/lib/containsNode": 18,
         "fbjs/lib/focusNode": 23,
         "fbjs/lib/getActiveElement": 24
     }],
-    120: [function(require, module, exports) {
+    124: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -14518,7 +15179,7 @@
 
         module.exports = ReactInstanceMap;
     }, {}],
-    121: [function(require, module, exports) {
+    125: [function(require, module, exports) {
         /**
          * Copyright 2016-present, Facebook, Inc.
          * All rights reserved.
@@ -14545,9 +15206,9 @@
             debugTool: debugTool
         };
     }, {
-        "./ReactDebugTool": 107
+        "./ReactDebugTool": 111
     }],
-    122: [function(require, module, exports) {
+    126: [function(require, module, exports) {
         /**
          * Copyright 2016-present, Facebook, Inc.
          * All rights reserved.
@@ -14587,7 +15248,7 @@
     }, {
         "fbjs/lib/warning": 36
     }],
-    123: [function(require, module, exports) {
+    127: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -14638,9 +15299,9 @@
 
         module.exports = ReactMarkupChecksum;
     }, {
-        "./adler32": 160
+        "./adler32": 164
     }],
-    124: [function(require, module, exports) {
+    128: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -15180,30 +15841,30 @@
 
         module.exports = ReactMount;
     }, {
-        "./DOMLazyTree": 67,
-        "./DOMProperty": 69,
-        "./ReactBrowserEventEmitter": 84,
-        "./ReactDOMComponentTree": 92,
-        "./ReactDOMContainerInfo": 93,
-        "./ReactDOMFeatureFlags": 95,
-        "./ReactFeatureFlags": 115,
-        "./ReactInstanceMap": 120,
-        "./ReactInstrumentation": 121,
-        "./ReactMarkupChecksum": 123,
-        "./ReactReconciler": 132,
-        "./ReactUpdateQueue": 138,
-        "./ReactUpdates": 139,
-        "./instantiateReactComponent": 178,
-        "./reactProdInvariant": 182,
-        "./setInnerHTML": 184,
-        "./shouldUpdateReactComponent": 186,
+        "./DOMLazyTree": 71,
+        "./DOMProperty": 73,
+        "./ReactBrowserEventEmitter": 88,
+        "./ReactDOMComponentTree": 96,
+        "./ReactDOMContainerInfo": 97,
+        "./ReactDOMFeatureFlags": 99,
+        "./ReactFeatureFlags": 119,
+        "./ReactInstanceMap": 124,
+        "./ReactInstrumentation": 125,
+        "./ReactMarkupChecksum": 127,
+        "./ReactReconciler": 136,
+        "./ReactUpdateQueue": 142,
+        "./ReactUpdates": 143,
+        "./instantiateReactComponent": 181,
+        "./reactProdInvariant": 185,
+        "./setInnerHTML": 187,
+        "./shouldUpdateReactComponent": 189,
         "fbjs/lib/emptyObject": 22,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/warning": 36,
-        "react/lib/React": 212,
-        "react/lib/ReactCurrentOwner": 220
+        "react/lib/React": 215,
+        "react/lib/ReactCurrentOwner": 223
     }],
-    125: [function(require, module, exports) {
+    129: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -15654,18 +16315,18 @@
 
         module.exports = ReactMultiChild;
     }, {
-        "./ReactChildReconciler": 85,
-        "./ReactComponentEnvironment": 87,
-        "./ReactInstanceMap": 120,
-        "./ReactInstrumentation": 121,
-        "./ReactReconciler": 132,
-        "./flattenChildren": 166,
-        "./reactProdInvariant": 182,
+        "./ReactChildReconciler": 89,
+        "./ReactComponentEnvironment": 91,
+        "./ReactInstanceMap": 124,
+        "./ReactInstrumentation": 125,
+        "./ReactReconciler": 136,
+        "./flattenChildren": 170,
+        "./reactProdInvariant": 185,
         "fbjs/lib/emptyFunction": 21,
         "fbjs/lib/invariant": 29,
-        "react/lib/ReactCurrentOwner": 220
+        "react/lib/ReactCurrentOwner": 223
     }],
-    126: [function(require, module, exports) {
+    130: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -15705,11 +16366,11 @@
 
         module.exports = ReactNodeTypes;
     }, {
-        "./reactProdInvariant": 182,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29,
-        "react/lib/React": 212
+        "react/lib/React": 215
     }],
-    127: [function(require, module, exports) {
+    131: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -15804,10 +16465,10 @@
 
         module.exports = ReactOwner;
     }, {
-        "./reactProdInvariant": 182,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29
     }],
-    128: [function(require, module, exports) {
+    132: [function(require, module, exports) {
         /**
          * Copyright 2016-present, Facebook, Inc.
          * All rights reserved.
@@ -16321,11 +16982,11 @@
 
         module.exports = ReactPerfAnalysis;
     }, {
-        "./ReactDebugTool": 107,
+        "./ReactDebugTool": 111,
         "fbjs/lib/warning": 36,
         "object-assign": 55
     }],
-    129: [function(require, module, exports) {
+    133: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -16351,7 +17012,7 @@
 
         module.exports = ReactPropTypeLocationNames;
     }, {}],
-    130: [function(require, module, exports) {
+    134: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -16369,7 +17030,7 @@
 
         module.exports = ReactPropTypesSecret;
     }, {}],
-    131: [function(require, module, exports) {
+    135: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -16548,16 +17209,16 @@
 
         module.exports = ReactReconcileTransaction;
     }, {
-        "./CallbackQueue": 64,
-        "./PooledClass": 83,
-        "./ReactBrowserEventEmitter": 84,
-        "./ReactInputSelection": 119,
-        "./ReactInstrumentation": 121,
-        "./ReactUpdateQueue": 138,
-        "./Transaction": 157,
+        "./CallbackQueue": 68,
+        "./PooledClass": 87,
+        "./ReactBrowserEventEmitter": 88,
+        "./ReactInputSelection": 123,
+        "./ReactInstrumentation": 125,
+        "./ReactUpdateQueue": 142,
+        "./Transaction": 161,
         "object-assign": 55
     }],
-    132: [function(require, module, exports) {
+    136: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -16726,11 +17387,11 @@
 
         module.exports = ReactReconciler;
     }, {
-        "./ReactInstrumentation": 121,
-        "./ReactRef": 133,
+        "./ReactInstrumentation": 125,
+        "./ReactRef": 137,
         "fbjs/lib/warning": 36
     }],
-    133: [function(require, module, exports) {
+    137: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -16820,9 +17481,9 @@
 
         module.exports = ReactRef;
     }, {
-        "./ReactOwner": 127
+        "./ReactOwner": 131
     }],
-    134: [function(require, module, exports) {
+    138: [function(require, module, exports) {
         /**
          * Copyright 2014-present, Facebook, Inc.
          * All rights reserved.
@@ -16913,13 +17574,13 @@
 
         module.exports = ReactServerRenderingTransaction;
     }, {
-        "./PooledClass": 83,
-        "./ReactInstrumentation": 121,
-        "./ReactServerUpdateQueue": 135,
-        "./Transaction": 157,
+        "./PooledClass": 87,
+        "./ReactInstrumentation": 125,
+        "./ReactServerUpdateQueue": 139,
+        "./Transaction": 161,
         "object-assign": 55
     }],
-    135: [function(require, module, exports) {
+    139: [function(require, module, exports) {
         /**
          * Copyright 2015-present, Facebook, Inc.
          * All rights reserved.
@@ -17063,10 +17724,10 @@
 
         module.exports = ReactServerUpdateQueue;
     }, {
-        "./ReactUpdateQueue": 138,
+        "./ReactUpdateQueue": 142,
         "fbjs/lib/warning": 36
     }],
-    136: [function(require, module, exports) {
+    140: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -17089,14 +17750,20 @@
         }
 
         var React = require('react/lib/React');
-        var ReactDefaultInjection = require('./ReactDefaultInjection');
         var ReactCompositeComponent = require('./ReactCompositeComponent');
+        var ReactDefaultBatchingStrategy = require('./ReactDefaultBatchingStrategy');
         var ReactReconciler = require('./ReactReconciler');
+        var ReactReconcileTransaction = require('./ReactReconcileTransaction');
         var ReactUpdates = require('./ReactUpdates');
 
         var emptyObject = require('fbjs/lib/emptyObject');
-        var getNextDebugID = require('./getNextDebugID');
+        var getNextDebugID = require('react/lib/getNextDebugID');
         var invariant = require('fbjs/lib/invariant');
+
+        function injectDefaults() {
+            ReactUpdates.injection.injectReconcileTransaction(ReactReconcileTransaction);
+            ReactUpdates.injection.injectBatchingStrategy(ReactDefaultBatchingStrategy);
+        }
 
         var NoopInternalComponent = function() {
             function NoopInternalComponent(element) {
@@ -17168,7 +17835,7 @@
                 // Ensure we've done the default injections. This might not be true in the
                 // case of a simple test that only requires React and the TestUtils in
                 // conjunction with an inline-requires transform.
-                ReactDefaultInjection.inject();
+                injectDefaults();
 
                 !React.isValidElement(element) ? "dev" !== 'production' ? invariant(false, 'ReactShallowRenderer render(): Invalid component element.%s', typeof element === 'function' ? ' Instead of passing a component class, make sure to instantiate ' + 'it by passing it to React.createElement.' : '') : _prodInvariant('12', typeof element === 'function' ? ' Instead of passing a component class, make sure to instantiate ' + 'it by passing it to React.createElement.' : '') : void 0;
                 !(typeof element.type !== 'string') ? "dev" !== 'production' ? invariant(false, 'ReactShallowRenderer render(): Shallow rendering works only with custom components, not primitives (%s). Instead of calling `.render(el)` and inspecting the rendered output, look at `el.props` directly instead.', element.type): _prodInvariant('13', element.type): void 0;
@@ -17191,6 +17858,12 @@
                 }
             };
 
+            ReactShallowRenderer.prototype.unstable_batchedUpdates = function unstable_batchedUpdates(callback, bookkeeping) {
+                // This is used by Enzyme for fake-simulating events in shallow mode.
+                injectDefaults();
+                return ReactUpdates.batchedUpdates(callback, bookkeeping);
+            };
+
             ReactShallowRenderer.prototype._render = function _render(element, transaction, context) {
                 if (this._instance) {
                     ReactReconciler.receiveComponent(this._instance, element, transaction, context);
@@ -17204,20 +17877,25 @@
             return ReactShallowRenderer;
         }();
 
+        ReactShallowRenderer.createRenderer = function() {
+            return new ReactShallowRenderer();
+        };
+
         module.exports = ReactShallowRenderer;
     }, {
-        "./ReactCompositeComponent": 88,
-        "./ReactDefaultInjection": 109,
-        "./ReactReconciler": 132,
-        "./ReactUpdates": 139,
-        "./getNextDebugID": 174,
-        "./reactProdInvariant": 182,
+        "./ReactCompositeComponent": 92,
+        "./ReactDefaultBatchingStrategy": 112,
+        "./ReactReconcileTransaction": 135,
+        "./ReactReconciler": 136,
+        "./ReactUpdates": 143,
+        "./reactProdInvariant": 185,
         "fbjs/lib/emptyObject": 22,
         "fbjs/lib/invariant": 29,
         "object-assign": 55,
-        "react/lib/React": 212
+        "react/lib/React": 215,
+        "react/lib/getNextDebugID": 241
     }],
-    137: [function(require, module, exports) {
+    141: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -17248,10 +17926,23 @@
 
         var findDOMNode = require('./findDOMNode');
         var invariant = require('fbjs/lib/invariant');
+        var warning = require('fbjs/lib/warning');
 
         var topLevelTypes = EventConstants.topLevelTypes;
 
         function Event(suffix) {}
+
+        // In react 16+ shallowRenderer will not be accessible via ReactTestUtils.createRenderer()
+        // Instead it will be available via react-test-renderer/shallow
+        // Maintain backwards compat for 15.5.0 release, but warn about using the deprecated method
+        var hasWarnedAboutCreateRenderer = false;
+
+        function createRendererWithWarning() {
+            "dev" !== 'production' ? warning(hasWarnedAboutCreateRenderer, 'Shallow renderer has been moved to react-test-renderer/shallow. ' + 'Update references to remove this warning.'): void 0;
+            hasWarnedAboutCreateRenderer = true;
+
+            return new ReactShallowRenderer();
+        }
 
         /**
          * @class ReactTestUtils
@@ -17511,9 +18202,7 @@
                 };
             },
 
-            createRenderer: function() {
-                return new ReactShallowRenderer();
-            },
+            createRenderer: createRendererWithWarning,
 
             Simulate: null,
             SimulateNative: {}
@@ -17632,24 +18321,25 @@
 
         module.exports = ReactTestUtils;
     }, {
-        "./EventConstants": 74,
-        "./EventPluginHub": 75,
-        "./EventPluginRegistry": 76,
-        "./EventPropagators": 78,
-        "./ReactBrowserEventEmitter": 84,
-        "./ReactDOM": 89,
-        "./ReactDOMComponentTree": 92,
-        "./ReactInstanceMap": 120,
-        "./ReactShallowRenderer": 136,
-        "./ReactUpdates": 139,
-        "./SyntheticEvent": 148,
-        "./findDOMNode": 165,
-        "./reactProdInvariant": 182,
+        "./EventConstants": 78,
+        "./EventPluginHub": 79,
+        "./EventPluginRegistry": 80,
+        "./EventPropagators": 82,
+        "./ReactBrowserEventEmitter": 88,
+        "./ReactDOM": 93,
+        "./ReactDOMComponentTree": 96,
+        "./ReactInstanceMap": 124,
+        "./ReactShallowRenderer": 140,
+        "./ReactUpdates": 143,
+        "./SyntheticEvent": 152,
+        "./findDOMNode": 169,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29,
+        "fbjs/lib/warning": 36,
         "object-assign": 55,
-        "react/lib/React": 212
+        "react/lib/React": 215
     }],
-    138: [function(require, module, exports) {
+    142: [function(require, module, exports) {
         /**
          * Copyright 2015-present, Facebook, Inc.
          * All rights reserved.
@@ -17820,7 +18510,7 @@
              * @param {object} completeState Next state.
              * @internal
              */
-            enqueueReplaceState: function(publicInstance, completeState) {
+            enqueueReplaceState: function(publicInstance, completeState, callback) {
                 var internalInstance = getInternalInstanceReadyForUpdate(publicInstance, 'replaceState');
 
                 if (!internalInstance) {
@@ -17829,6 +18519,16 @@
 
                 internalInstance._pendingStateQueue = [completeState];
                 internalInstance._pendingReplaceState = true;
+
+                // Future-proof 15.5
+                if (callback !== undefined && callback !== null) {
+                    ReactUpdateQueue.validateCallback(callback, 'replaceState');
+                    if (internalInstance._pendingCallbacks) {
+                        internalInstance._pendingCallbacks.push(callback);
+                    } else {
+                        internalInstance._pendingCallbacks = [callback];
+                    }
+                }
 
                 enqueueUpdate(internalInstance);
             },
@@ -17876,15 +18576,15 @@
 
         module.exports = ReactUpdateQueue;
     }, {
-        "./ReactInstanceMap": 120,
-        "./ReactInstrumentation": 121,
-        "./ReactUpdates": 139,
-        "./reactProdInvariant": 182,
+        "./ReactInstanceMap": 124,
+        "./ReactInstrumentation": 125,
+        "./ReactUpdates": 143,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/warning": 36,
-        "react/lib/ReactCurrentOwner": 220
+        "react/lib/ReactCurrentOwner": 223
     }],
-    139: [function(require, module, exports) {
+    143: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -18137,16 +18837,16 @@
 
         module.exports = ReactUpdates;
     }, {
-        "./CallbackQueue": 64,
-        "./PooledClass": 83,
-        "./ReactFeatureFlags": 115,
-        "./ReactReconciler": 132,
-        "./Transaction": 157,
-        "./reactProdInvariant": 182,
+        "./CallbackQueue": 68,
+        "./PooledClass": 87,
+        "./ReactFeatureFlags": 119,
+        "./ReactReconciler": 136,
+        "./Transaction": 161,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29,
         "object-assign": 55
     }],
-    140: [function(require, module, exports) {
+    144: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -18159,9 +18859,9 @@
 
         'use strict';
 
-        module.exports = '15.4.2';
+        module.exports = '15.5.4';
     }, {}],
-    141: [function(require, module, exports) {
+    145: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -18464,7 +19164,7 @@
 
         module.exports = SVGDOMPropertyConfig;
     }, {}],
-    142: [function(require, module, exports) {
+    146: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -18656,16 +19356,16 @@
 
         module.exports = SelectEventPlugin;
     }, {
-        "./EventPropagators": 78,
-        "./ReactDOMComponentTree": 92,
-        "./ReactInputSelection": 119,
-        "./SyntheticEvent": 148,
-        "./isTextInputElement": 180,
+        "./EventPropagators": 82,
+        "./ReactDOMComponentTree": 96,
+        "./ReactInputSelection": 123,
+        "./SyntheticEvent": 152,
+        "./isTextInputElement": 183,
         "fbjs/lib/ExecutionEnvironment": 15,
         "fbjs/lib/getActiveElement": 24,
         "fbjs/lib/shallowEqual": 35
     }],
-    143: [function(require, module, exports) {
+    147: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -18893,26 +19593,26 @@
 
         module.exports = SimpleEventPlugin;
     }, {
-        "./EventPropagators": 78,
-        "./ReactDOMComponentTree": 92,
-        "./SyntheticAnimationEvent": 144,
-        "./SyntheticClipboardEvent": 145,
-        "./SyntheticDragEvent": 147,
-        "./SyntheticEvent": 148,
-        "./SyntheticFocusEvent": 149,
-        "./SyntheticKeyboardEvent": 151,
-        "./SyntheticMouseEvent": 152,
-        "./SyntheticTouchEvent": 153,
-        "./SyntheticTransitionEvent": 154,
-        "./SyntheticUIEvent": 155,
-        "./SyntheticWheelEvent": 156,
-        "./getEventCharCode": 168,
-        "./reactProdInvariant": 182,
+        "./EventPropagators": 82,
+        "./ReactDOMComponentTree": 96,
+        "./SyntheticAnimationEvent": 148,
+        "./SyntheticClipboardEvent": 149,
+        "./SyntheticDragEvent": 151,
+        "./SyntheticEvent": 152,
+        "./SyntheticFocusEvent": 153,
+        "./SyntheticKeyboardEvent": 155,
+        "./SyntheticMouseEvent": 156,
+        "./SyntheticTouchEvent": 157,
+        "./SyntheticTransitionEvent": 158,
+        "./SyntheticUIEvent": 159,
+        "./SyntheticWheelEvent": 160,
+        "./getEventCharCode": 172,
+        "./reactProdInvariant": 185,
         "fbjs/lib/EventListener": 14,
         "fbjs/lib/emptyFunction": 21,
         "fbjs/lib/invariant": 29
     }],
-    144: [function(require, module, exports) {
+    148: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -18952,9 +19652,9 @@
 
         module.exports = SyntheticAnimationEvent;
     }, {
-        "./SyntheticEvent": 148
+        "./SyntheticEvent": 152
     }],
-    145: [function(require, module, exports) {
+    149: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -18993,9 +19693,9 @@
 
         module.exports = SyntheticClipboardEvent;
     }, {
-        "./SyntheticEvent": 148
+        "./SyntheticEvent": 152
     }],
-    146: [function(require, module, exports) {
+    150: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -19032,9 +19732,9 @@
 
         module.exports = SyntheticCompositionEvent;
     }, {
-        "./SyntheticEvent": 148
+        "./SyntheticEvent": 152
     }],
-    147: [function(require, module, exports) {
+    151: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -19071,9 +19771,9 @@
 
         module.exports = SyntheticDragEvent;
     }, {
-        "./SyntheticMouseEvent": 152
+        "./SyntheticMouseEvent": 156
     }],
-    148: [function(require, module, exports) {
+    152: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -19342,12 +20042,12 @@
             }
         }
     }, {
-        "./PooledClass": 83,
+        "./PooledClass": 87,
         "fbjs/lib/emptyFunction": 21,
         "fbjs/lib/warning": 36,
         "object-assign": 55
     }],
-    149: [function(require, module, exports) {
+    153: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -19384,9 +20084,9 @@
 
         module.exports = SyntheticFocusEvent;
     }, {
-        "./SyntheticUIEvent": 155
+        "./SyntheticUIEvent": 159
     }],
-    150: [function(require, module, exports) {
+    154: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -19424,9 +20124,9 @@
 
         module.exports = SyntheticInputEvent;
     }, {
-        "./SyntheticEvent": 148
+        "./SyntheticEvent": 152
     }],
-    151: [function(require, module, exports) {
+    155: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -19511,12 +20211,12 @@
 
         module.exports = SyntheticKeyboardEvent;
     }, {
-        "./SyntheticUIEvent": 155,
-        "./getEventCharCode": 168,
-        "./getEventKey": 169,
-        "./getEventModifierState": 170
+        "./SyntheticUIEvent": 159,
+        "./getEventCharCode": 172,
+        "./getEventKey": 173,
+        "./getEventModifierState": 174
     }],
-    152: [function(require, module, exports) {
+    156: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -19589,11 +20289,11 @@
 
         module.exports = SyntheticMouseEvent;
     }, {
-        "./SyntheticUIEvent": 155,
-        "./ViewportMetrics": 158,
-        "./getEventModifierState": 170
+        "./SyntheticUIEvent": 159,
+        "./ViewportMetrics": 162,
+        "./getEventModifierState": 174
     }],
-    153: [function(require, module, exports) {
+    157: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -19639,10 +20339,10 @@
 
         module.exports = SyntheticTouchEvent;
     }, {
-        "./SyntheticUIEvent": 155,
-        "./getEventModifierState": 170
+        "./SyntheticUIEvent": 159,
+        "./getEventModifierState": 174
     }],
-    154: [function(require, module, exports) {
+    158: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -19682,9 +20382,9 @@
 
         module.exports = SyntheticTransitionEvent;
     }, {
-        "./SyntheticEvent": 148
+        "./SyntheticEvent": 152
     }],
-    155: [function(require, module, exports) {
+    159: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -19744,10 +20444,10 @@
 
         module.exports = SyntheticUIEvent;
     }, {
-        "./SyntheticEvent": 148,
-        "./getEventTarget": 171
+        "./SyntheticEvent": 152,
+        "./getEventTarget": 175
     }],
-    156: [function(require, module, exports) {
+    160: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -19802,9 +20502,9 @@
 
         module.exports = SyntheticWheelEvent;
     }, {
-        "./SyntheticMouseEvent": 152
+        "./SyntheticMouseEvent": 156
     }],
-    157: [function(require, module, exports) {
+    161: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -20030,10 +20730,10 @@
 
         module.exports = TransactionImpl;
     }, {
-        "./reactProdInvariant": 182,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29
     }],
-    158: [function(require, module, exports) {
+    162: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -20061,7 +20761,7 @@
 
         module.exports = ViewportMetrics;
     }, {}],
-    159: [function(require, module, exports) {
+    163: [function(require, module, exports) {
         /**
          * Copyright 2014-present, Facebook, Inc.
          * All rights reserved.
@@ -20120,10 +20820,10 @@
 
         module.exports = accumulateInto;
     }, {
-        "./reactProdInvariant": 182,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29
     }],
-    160: [function(require, module, exports) {
+    164: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -20168,7 +20868,7 @@
 
         module.exports = adler32;
     }, {}],
-    161: [function(require, module, exports) {
+    165: [function(require, module, exports) {
         (function(process) {
             /**
              * Copyright 2013-present, Facebook, Inc.
@@ -20258,15 +20958,15 @@
             module.exports = checkReactTypeSpec;
         }).call(this, require('_process'))
     }, {
-        "./ReactPropTypeLocationNames": 129,
-        "./ReactPropTypesSecret": 130,
-        "./reactProdInvariant": 182,
+        "./ReactPropTypeLocationNames": 133,
+        "./ReactPropTypesSecret": 134,
+        "./reactProdInvariant": 185,
         "_process": 56,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/warning": 36,
-        "react/lib/ReactComponentTreeHook": 219
+        "react/lib/ReactComponentTreeHook": 222
     }],
-    162: [function(require, module, exports) {
+    166: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -20299,7 +20999,7 @@
 
         module.exports = createMicrosoftUnsafeLocalFunction;
     }, {}],
-    163: [function(require, module, exports) {
+    167: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -20379,10 +21079,10 @@
 
         module.exports = dangerousStyleValue;
     }, {
-        "./CSSProperty": 62,
+        "./CSSProperty": 66,
         "fbjs/lib/warning": 36
     }],
-    164: [function(require, module, exports) {
+    168: [function(require, module, exports) {
         /**
          * Copyright 2016-present, Facebook, Inc.
          * All rights reserved.
@@ -20506,7 +21206,7 @@
 
         module.exports = escapeTextContentForBrowser;
     }, {}],
-    165: [function(require, module, exports) {
+    169: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -20567,15 +21267,15 @@
 
         module.exports = findDOMNode;
     }, {
-        "./ReactDOMComponentTree": 92,
-        "./ReactInstanceMap": 120,
-        "./getHostComponentFromComposite": 172,
-        "./reactProdInvariant": 182,
+        "./ReactDOMComponentTree": 96,
+        "./ReactInstanceMap": 124,
+        "./getHostComponentFromComposite": 176,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/warning": 36,
-        "react/lib/ReactCurrentOwner": 220
+        "react/lib/ReactCurrentOwner": 223
     }],
-    166: [function(require, module, exports) {
+    170: [function(require, module, exports) {
         (function(process) {
             /**
              * Copyright 2013-present, Facebook, Inc.
@@ -20654,13 +21354,13 @@
             module.exports = flattenChildren;
         }).call(this, require('_process'))
     }, {
-        "./KeyEscapeUtils": 81,
-        "./traverseAllChildren": 187,
+        "./KeyEscapeUtils": 85,
+        "./traverseAllChildren": 190,
         "_process": 56,
         "fbjs/lib/warning": 36,
-        "react/lib/ReactComponentTreeHook": 219
+        "react/lib/ReactComponentTreeHook": 222
     }],
-    167: [function(require, module, exports) {
+    171: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -20692,7 +21392,7 @@
 
         module.exports = forEachAccumulated;
     }, {}],
-    168: [function(require, module, exports) {
+    172: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -20743,7 +21443,7 @@
 
         module.exports = getEventCharCode;
     }, {}],
-    169: [function(require, module, exports) {
+    173: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -20856,9 +21556,9 @@
 
         module.exports = getEventKey;
     }, {
-        "./getEventCharCode": 168
+        "./getEventCharCode": 172
     }],
-    170: [function(require, module, exports) {
+    174: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -20902,7 +21602,7 @@
 
         module.exports = getEventModifierState;
     }, {}],
-    171: [function(require, module, exports) {
+    175: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -20938,7 +21638,7 @@
 
         module.exports = getEventTarget;
     }, {}],
-    172: [function(require, module, exports) {
+    176: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -20969,9 +21669,9 @@
 
         module.exports = getHostComponentFromComposite;
     }, {
-        "./ReactNodeTypes": 126
+        "./ReactNodeTypes": 130
     }],
-    173: [function(require, module, exports) {
+    177: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -21013,29 +21713,7 @@
 
         module.exports = getIteratorFn;
     }, {}],
-    174: [function(require, module, exports) {
-        /**
-         * Copyright 2013-present, Facebook, Inc.
-         * All rights reserved.
-         *
-         * This source code is licensed under the BSD-style license found in the
-         * LICENSE file in the root directory of this source tree. An additional grant
-         * of patent rights can be found in the PATENTS file in the same directory.
-         *
-         * 
-         */
-
-        'use strict';
-
-        var nextDebugID = 1;
-
-        function getNextDebugID() {
-            return nextDebugID++;
-        }
-
-        module.exports = getNextDebugID;
-    }, {}],
-    175: [function(require, module, exports) {
+    178: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -21110,7 +21788,7 @@
 
         module.exports = getNodeForCharacterOffset;
     }, {}],
-    176: [function(require, module, exports) {
+    179: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -21146,7 +21824,7 @@
     }, {
         "fbjs/lib/ExecutionEnvironment": 15
     }],
-    177: [function(require, module, exports) {
+    180: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -21250,7 +21928,7 @@
     }, {
         "fbjs/lib/ExecutionEnvironment": 15
     }],
-    178: [function(require, module, exports) {
+    181: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -21270,7 +21948,7 @@
         var ReactEmptyComponent = require('./ReactEmptyComponent');
         var ReactHostComponent = require('./ReactHostComponent');
 
-        var getNextDebugID = require('./getNextDebugID');
+        var getNextDebugID = require('react/lib/getNextDebugID');
         var invariant = require('fbjs/lib/invariant');
         var warning = require('fbjs/lib/warning');
 
@@ -21278,9 +21956,6 @@
         var ReactCompositeComponentWrapper = function(element) {
             this.construct(element);
         };
-        _assign(ReactCompositeComponentWrapper.prototype, ReactCompositeComponent, {
-            _instantiateReactComponent: instantiateReactComponent
-        });
 
         function getDeclarationErrorAddendum(owner) {
             if (owner) {
@@ -21377,18 +22052,22 @@
             return instance;
         }
 
+        _assign(ReactCompositeComponentWrapper.prototype, ReactCompositeComponent, {
+            _instantiateReactComponent: instantiateReactComponent
+        });
+
         module.exports = instantiateReactComponent;
     }, {
-        "./ReactCompositeComponent": 88,
-        "./ReactEmptyComponent": 111,
-        "./ReactHostComponent": 116,
-        "./getNextDebugID": 174,
-        "./reactProdInvariant": 182,
+        "./ReactCompositeComponent": 92,
+        "./ReactEmptyComponent": 115,
+        "./ReactHostComponent": 120,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/warning": 36,
-        "object-assign": 55
+        "object-assign": 55,
+        "react/lib/getNextDebugID": 241
     }],
-    179: [function(require, module, exports) {
+    182: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -21451,7 +22130,7 @@
     }, {
         "fbjs/lib/ExecutionEnvironment": 15
     }],
-    180: [function(require, module, exports) {
+    183: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -21503,7 +22182,7 @@
 
         module.exports = isTextInputElement;
     }, {}],
-    181: [function(require, module, exports) {
+    184: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -21530,9 +22209,9 @@
 
         module.exports = quoteAttributeValueForBrowser;
     }, {
-        "./escapeTextContentForBrowser": 164
+        "./escapeTextContentForBrowser": 168
     }],
-    182: [function(require, module, exports) {
+    185: [function(require, module, exports) {
         /**
          * Copyright (c) 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -21572,7 +22251,7 @@
 
         module.exports = reactProdInvariant;
     }, {}],
-    183: [function(require, module, exports) {
+    186: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -21589,9 +22268,9 @@
 
         module.exports = ReactMount.renderSubtreeIntoContainer;
     }, {
-        "./ReactMount": 124
+        "./ReactMount": 128
     }],
-    184: [function(require, module, exports) {
+    187: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -21690,11 +22369,11 @@
 
         module.exports = setInnerHTML;
     }, {
-        "./DOMNamespaces": 68,
-        "./createMicrosoftUnsafeLocalFunction": 162,
+        "./DOMNamespaces": 72,
+        "./createMicrosoftUnsafeLocalFunction": 166,
         "fbjs/lib/ExecutionEnvironment": 15
     }],
-    185: [function(require, module, exports) {
+    188: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -21747,11 +22426,11 @@
 
         module.exports = setTextContent;
     }, {
-        "./escapeTextContentForBrowser": 164,
-        "./setInnerHTML": 184,
+        "./escapeTextContentForBrowser": 168,
+        "./setInnerHTML": 187,
         "fbjs/lib/ExecutionEnvironment": 15
     }],
-    186: [function(require, module, exports) {
+    189: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -21794,7 +22473,7 @@
 
         module.exports = shouldUpdateReactComponent;
     }, {}],
-    187: [function(require, module, exports) {
+    190: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -21971,15 +22650,15 @@
 
         module.exports = traverseAllChildren;
     }, {
-        "./KeyEscapeUtils": 81,
-        "./ReactElementSymbol": 110,
-        "./getIteratorFn": 173,
-        "./reactProdInvariant": 182,
+        "./KeyEscapeUtils": 85,
+        "./ReactElementSymbol": 114,
+        "./getIteratorFn": 177,
+        "./reactProdInvariant": 185,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/warning": 36,
-        "react/lib/ReactCurrentOwner": 220
+        "react/lib/ReactCurrentOwner": 223
     }],
-    188: [function(require, module, exports) {
+    191: [function(require, module, exports) {
         /**
          * Copyright 2015-present, Facebook, Inc.
          * All rights reserved.
@@ -22210,16 +22889,11 @@
                     case 'section':
                     case 'summary':
                     case 'ul':
-
                     case 'pre':
                     case 'listing':
-
                     case 'table':
-
                     case 'hr':
-
                     case 'xmp':
-
                     case 'h1':
                     case 'h2':
                     case 'h3':
@@ -22370,7 +23044,7 @@
         "fbjs/lib/warning": 36,
         "object-assign": 55
     }],
-    189: [function(require, module, exports) {
+    192: [function(require, module, exports) {
         'use strict';
 
         Object.defineProperty(exports, '__esModule', {
@@ -22851,19 +23525,19 @@
         <Swipeable onSwipedLeft={this.gotoNext} onSwipedRight={this.gotoPrev} />
         */
     }, {
-        "./components/Arrow": 190,
-        "./components/Container": 191,
-        "./components/Footer": 192,
-        "./components/Header": 193,
-        "./components/PaginatedThumbnails": 195,
-        "./components/Portal": 197,
-        "./theme": 203,
-        "./utils": 207,
+        "./components/Arrow": 193,
+        "./components/Container": 194,
+        "./components/Footer": 195,
+        "./components/Header": 196,
+        "./components/PaginatedThumbnails": 198,
+        "./components/Portal": 200,
+        "./theme": 206,
+        "./utils": 210,
         "aphrodite/no-important": 10,
-        "react": 241,
-        "react-scrolllock": 208
+        "react": 245,
+        "react-scrolllock": 211
     }],
-    190: [function(require, module, exports) {
+    193: [function(require, module, exports) {
         'use strict';
 
         var _extends = Object.assign || function(target) {
@@ -22997,13 +23671,13 @@
 
         module.exports = Arrow;
     }, {
-        "../theme": 203,
-        "../utils": 207,
-        "./Icon": 194,
+        "../theme": 206,
+        "../utils": 210,
+        "./Icon": 197,
         "aphrodite/no-important": 10,
-        "react": 241
+        "react": 245
     }],
-    191: [function(require, module, exports) {
+    194: [function(require, module, exports) {
         'use strict';
 
         var _extends = Object.assign || function(target) {
@@ -23084,12 +23758,12 @@
 
         module.exports = Container;
     }, {
-        "../theme": 203,
-        "../utils": 207,
+        "../theme": 206,
+        "../utils": 210,
         "aphrodite/no-important": 10,
-        "react": 241
+        "react": 245
     }],
-    192: [function(require, module, exports) {
+    195: [function(require, module, exports) {
         'use strict';
 
         var _extends = Object.assign || function(target) {
@@ -23209,12 +23883,12 @@
 
         module.exports = Footer;
     }, {
-        "../theme": 203,
-        "../utils": 207,
+        "../theme": 206,
+        "../utils": 210,
         "aphrodite/no-important": 10,
-        "react": 241
+        "react": 245
     }],
-    193: [function(require, module, exports) {
+    196: [function(require, module, exports) {
         'use strict';
 
         var _extends = Object.assign || function(target) {
@@ -23325,13 +23999,13 @@
 
         module.exports = Header;
     }, {
-        "../theme": 203,
-        "../utils": 207,
-        "./Icon": 194,
+        "../theme": 206,
+        "../utils": 210,
+        "./Icon": 197,
         "aphrodite/no-important": 10,
-        "react": 241
+        "react": 245
     }],
-    194: [function(require, module, exports) {
+    197: [function(require, module, exports) {
         'use strict';
 
         Object.defineProperty(exports, '__esModule', {
@@ -23400,10 +24074,10 @@
         exports['default'] = Icon;
         module.exports = exports['default'];
     }, {
-        "../icons": 202,
-        "react": 241
+        "../icons": 205,
+        "react": 245
     }],
-    195: [function(require, module, exports) {
+    198: [function(require, module, exports) {
         'use strict';
 
         Object.defineProperty(exports, '__esModule', {
@@ -23713,13 +24387,13 @@
         };
         module.exports = exports['default'];
     }, {
-        "../theme": 203,
-        "./Arrow": 190,
-        "./Thumbnail": 198,
+        "../theme": 206,
+        "./Arrow": 193,
+        "./Thumbnail": 201,
         "aphrodite/no-important": 10,
-        "react": 241
+        "react": 245
     }],
-    196: [function(require, module, exports) {
+    199: [function(require, module, exports) {
         'use strict';
 
         Object.defineProperty(exports, '__esModule', {
@@ -23838,9 +24512,9 @@
         exports['default'] = PassContext;
         module.exports = exports['default'];
     }, {
-        "react": 241
+        "react": 245
     }],
-    197: [function(require, module, exports) {
+    200: [function(require, module, exports) {
         'use strict';
 
         Object.defineProperty(exports, '__esModule', {
@@ -24018,12 +24692,12 @@
         };
         module.exports = exports['default'];
     }, {
-        "./PassContext": 196,
-        "react": 241,
-        "react-addons-css-transition-group": 57,
-        "react-dom": 58
+        "./PassContext": 199,
+        "react": 245,
+        "react-addons-css-transition-group": 61,
+        "react-dom": 62
     }],
-    198: [function(require, module, exports) {
+    201: [function(require, module, exports) {
         'use strict';
 
         Object.defineProperty(exports, '__esModule', {
@@ -24106,12 +24780,12 @@
         exports['default'] = Thumbnail;
         module.exports = exports['default'];
     }, {
-        "../theme": 203,
-        "../utils": 207,
+        "../theme": 206,
+        "../utils": 210,
         "aphrodite/no-important": 10,
-        "react": 241
+        "react": 245
     }],
-    199: [function(require, module, exports) {
+    202: [function(require, module, exports) {
         "use strict";
 
         Object.defineProperty(exports, "__esModule", {
@@ -24124,7 +24798,7 @@
 
         module.exports = exports["default"];
     }, {}],
-    200: [function(require, module, exports) {
+    203: [function(require, module, exports) {
         "use strict";
 
         Object.defineProperty(exports, "__esModule", {
@@ -24137,7 +24811,7 @@
 
         module.exports = exports["default"];
     }, {}],
-    201: [function(require, module, exports) {
+    204: [function(require, module, exports) {
         "use strict";
 
         Object.defineProperty(exports, "__esModule", {
@@ -24150,7 +24824,7 @@
 
         module.exports = exports["default"];
     }, {}],
-    202: [function(require, module, exports) {
+    205: [function(require, module, exports) {
         'use strict';
 
         module.exports = {
@@ -24159,11 +24833,11 @@
             close: require('./close')
         };
     }, {
-        "./arrowLeft": 199,
-        "./arrowRight": 200,
-        "./close": 201
+        "./arrowLeft": 202,
+        "./arrowRight": 203,
+        "./close": 204
     }],
-    203: [function(require, module, exports) {
+    206: [function(require, module, exports) {
         // ==============================
         // THEME
         // ==============================
@@ -24222,7 +24896,7 @@
 
         module.exports = theme;
     }, {}],
-    204: [function(require, module, exports) {
+    207: [function(require, module, exports) {
         /**
         	Bind multiple component methods:
 
@@ -24245,14 +24919,14 @@
             });
         };
     }, {}],
-    205: [function(require, module, exports) {
+    208: [function(require, module, exports) {
         // Return true if window + document
 
         'use strict';
 
         module.exports = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
     }, {}],
-    206: [function(require, module, exports) {
+    209: [function(require, module, exports) {
         'use strict';
 
         var _extends = Object.assign || function(target) {
@@ -24289,7 +24963,7 @@
 
         module.exports = deepMerge;
     }, {}],
-    207: [function(require, module, exports) {
+    210: [function(require, module, exports) {
         'use strict';
 
         function _interopRequireDefault(obj) {
@@ -24316,17 +24990,17 @@
             deepMerge: _deepMerge2['default']
         };
     }, {
-        "./bindFunctions": 204,
-        "./canUseDom": 205,
-        "./deepMerge": 206
+        "./bindFunctions": 207,
+        "./canUseDom": 208,
+        "./deepMerge": 209
     }],
-    208: [function(require, module, exports) {
+    211: [function(require, module, exports) {
         module.exports = require('./src/ScrollLock');
 
     }, {
-        "./src/ScrollLock": 209
+        "./src/ScrollLock": 212
     }],
-    209: [function(require, module, exports) {
+    212: [function(require, module, exports) {
         var React = require('react');
 
         /*
@@ -24410,21 +25084,21 @@
         module.exports = ScrollLock;
 
     }, {
-        "react": 241
+        "react": 245
     }],
-    210: [function(require, module, exports) {
-        arguments[4][81][0].apply(exports, arguments)
+    213: [function(require, module, exports) {
+        arguments[4][85][0].apply(exports, arguments)
     }, {
-        "dup": 81
+        "dup": 85
     }],
-    211: [function(require, module, exports) {
-        arguments[4][83][0].apply(exports, arguments)
+    214: [function(require, module, exports) {
+        arguments[4][87][0].apply(exports, arguments)
     }, {
-        "./reactProdInvariant": 239,
-        "dup": 83,
+        "./reactProdInvariant": 243,
+        "dup": 87,
         "fbjs/lib/invariant": 29
     }],
-    212: [function(require, module, exports) {
+    215: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -24456,7 +25130,9 @@
         var cloneElement = ReactElement.cloneElement;
 
         if ("dev" !== 'production') {
+            var canDefineProperty = require('./canDefineProperty');
             var ReactElementValidator = require('./ReactElementValidator');
+            var didWarnPropTypesDeprecated = false;
             createElement = ReactElementValidator.createElement;
             createFactory = ReactElementValidator.createFactory;
             cloneElement = ReactElementValidator.cloneElement;
@@ -24512,22 +25188,36 @@
             __spread: __spread
         };
 
+        // TODO: Fix tests so that this deprecation warning doesn't cause failures.
+        if ("dev" !== 'production') {
+            if (canDefineProperty) {
+                Object.defineProperty(React, 'PropTypes', {
+                    get: function() {
+                        "dev" !== 'production' ? warning(didWarnPropTypesDeprecated, 'Accessing PropTypes via the main React package is deprecated. Use ' + 'the prop-types package from npm instead.'): void 0;
+                        didWarnPropTypesDeprecated = true;
+                        return ReactPropTypes;
+                    }
+                });
+            }
+        }
+
         module.exports = React;
     }, {
-        "./ReactChildren": 216,
-        "./ReactClass": 217,
-        "./ReactComponent": 218,
-        "./ReactDOMFactories": 221,
-        "./ReactElement": 222,
-        "./ReactElementValidator": 224,
-        "./ReactPropTypes": 227,
-        "./ReactPureComponent": 229,
-        "./ReactVersion": 233,
-        "./onlyChild": 238,
+        "./ReactChildren": 219,
+        "./ReactClass": 220,
+        "./ReactComponent": 221,
+        "./ReactDOMFactories": 224,
+        "./ReactElement": 225,
+        "./ReactElementValidator": 227,
+        "./ReactPropTypes": 230,
+        "./ReactPureComponent": 232,
+        "./ReactVersion": 236,
+        "./canDefineProperty": 237,
+        "./onlyChild": 242,
         "fbjs/lib/warning": 36,
         "object-assign": 55
     }],
-    213: [function(require, module, exports) {
+    216: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -24565,11 +25255,11 @@
             };
         }
     }, {
-        "react-dom/lib/ReactDOM": 89,
-        "react-dom/lib/ReactPerf": 128,
-        "react-dom/lib/ReactTestUtils": 137
+        "react-dom/lib/ReactDOM": 93,
+        "react-dom/lib/ReactPerf": 132,
+        "react-dom/lib/ReactTestUtils": 141
     }],
-    214: [function(require, module, exports) {
+    217: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -24613,6 +25303,8 @@
         }
 
         var React = require('./React');
+        var propTypesFactory = require('prop-types/factory');
+        var PropTypes = propTypesFactory(React.isValidElement);
 
         var ReactTransitionGroup = require('./ReactTransitionGroup');
         var ReactCSSTransitionGroupChild = require('./ReactCSSTransitionGroupChild');
@@ -24683,9 +25375,9 @@
         ReactCSSTransitionGroup.propTypes = {
             transitionName: ReactCSSTransitionGroupChild.propTypes.name,
 
-            transitionAppear: React.PropTypes.bool,
-            transitionEnter: React.PropTypes.bool,
-            transitionLeave: React.PropTypes.bool,
+            transitionAppear: PropTypes.bool,
+            transitionEnter: PropTypes.bool,
+            transitionLeave: PropTypes.bool,
             transitionAppearTimeout: createTransitionTimeoutPropValidator('Appear'),
             transitionEnterTimeout: createTransitionTimeoutPropValidator('Enter'),
             transitionLeaveTimeout: createTransitionTimeoutPropValidator('Leave')
@@ -24699,12 +25391,13 @@
 
         module.exports = ReactCSSTransitionGroup;
     }, {
-        "./React": 212,
-        "./ReactCSSTransitionGroupChild": 215,
-        "./ReactTransitionGroup": 232,
-        "object-assign": 55
+        "./React": 215,
+        "./ReactCSSTransitionGroupChild": 218,
+        "./ReactTransitionGroup": 235,
+        "object-assign": 55,
+        "prop-types/factory": 58
     }],
-    215: [function(require, module, exports) {
+    218: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -24717,8 +25410,39 @@
 
         'use strict';
 
+        function _classCallCheck(instance, Constructor) {
+            if (!(instance instanceof Constructor)) {
+                throw new TypeError("Cannot call a class as a function");
+            }
+        }
+
+        function _possibleConstructorReturn(self, call) {
+            if (!self) {
+                throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+            }
+            return call && (typeof call === "object" || typeof call === "function") ? call : self;
+        }
+
+        function _inherits(subClass, superClass) {
+            if (typeof superClass !== "function" && superClass !== null) {
+                throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+            }
+            subClass.prototype = Object.create(superClass && superClass.prototype, {
+                constructor: {
+                    value: subClass,
+                    enumerable: false,
+                    writable: true,
+                    configurable: true
+                }
+            });
+            if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+        }
+
         var React = require('./React');
         var ReactAddonsDOMDependencies = require('./ReactAddonsDOMDependencies');
+
+        var propTypesFactory = require('prop-types/factory');
+        var PropTypes = propTypesFactory(React.isValidElement);
 
         var CSSCore = require('fbjs/lib/CSSCore');
         var ReactTransitionEvents = require('./ReactTransitionEvents');
@@ -24727,110 +25451,115 @@
 
         var TICK = 17;
 
-        var ReactCSSTransitionGroupChild = React.createClass({
-            displayName: 'ReactCSSTransitionGroupChild',
+        var ReactCSSTransitionGroupChild = function(_React$Component) {
+            _inherits(ReactCSSTransitionGroupChild, _React$Component);
 
-            propTypes: {
-                name: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.shape({
-                    enter: React.PropTypes.string,
-                    leave: React.PropTypes.string,
-                    active: React.PropTypes.string
-                }), React.PropTypes.shape({
-                    enter: React.PropTypes.string,
-                    enterActive: React.PropTypes.string,
-                    leave: React.PropTypes.string,
-                    leaveActive: React.PropTypes.string,
-                    appear: React.PropTypes.string,
-                    appearActive: React.PropTypes.string
-                })]).isRequired,
+            function ReactCSSTransitionGroupChild() {
+                var _temp, _this, _ret;
 
-                // Once we require timeouts to be specified, we can remove the
-                // boolean flags (appear etc.) and just accept a number
-                // or a bool for the timeout flags (appearTimeout etc.)
-                appear: React.PropTypes.bool,
-                enter: React.PropTypes.bool,
-                leave: React.PropTypes.bool,
-                appearTimeout: React.PropTypes.number,
-                enterTimeout: React.PropTypes.number,
-                leaveTimeout: React.PropTypes.number
-            },
+                _classCallCheck(this, ReactCSSTransitionGroupChild);
 
-            transition: function(animationType, finishCallback, userSpecifiedDelay) {
-                var node = ReactAddonsDOMDependencies.getReactDOM().findDOMNode(this);
-
-                if (!node) {
-                    if (finishCallback) {
-                        finishCallback();
-                    }
-                    return;
+                for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                    args[_key] = arguments[_key];
                 }
 
-                var className = this.props.name[animationType] || this.props.name + '-' + animationType;
-                var activeClassName = this.props.name[animationType + 'Active'] || className + '-active';
-                var timeout = null;
+                return _ret = (_temp = (_this = _possibleConstructorReturn(this, _React$Component.call.apply(_React$Component, [this].concat(args))), _this), _this._isMounted = false, _this.transition = function(animationType, finishCallback, userSpecifiedDelay) {
+                    var node = ReactAddonsDOMDependencies.getReactDOM().findDOMNode(_this);
 
-                var endListener = function(e) {
-                    if (e && e.target !== node) {
+                    if (!node) {
+                        if (finishCallback) {
+                            finishCallback();
+                        }
                         return;
                     }
 
-                    clearTimeout(timeout);
+                    var className = _this.props.name[animationType] || _this.props.name + '-' + animationType;
+                    var activeClassName = _this.props.name[animationType + 'Active'] || className + '-active';
+                    var timeout = null;
 
-                    CSSCore.removeClass(node, className);
-                    CSSCore.removeClass(node, activeClassName);
+                    var endListener = function(e) {
+                        if (e && e.target !== node) {
+                            return;
+                        }
 
-                    ReactTransitionEvents.removeEndEventListener(node, endListener);
+                        clearTimeout(timeout);
 
-                    // Usually this optional callback is used for informing an owner of
-                    // a leave animation and telling it to remove the child.
-                    if (finishCallback) {
-                        finishCallback();
+                        CSSCore.removeClass(node, className);
+                        CSSCore.removeClass(node, activeClassName);
+
+                        ReactTransitionEvents.removeEndEventListener(node, endListener);
+
+                        // Usually this optional callback is used for informing an owner of
+                        // a leave animation and telling it to remove the child.
+                        if (finishCallback) {
+                            finishCallback();
+                        }
+                    };
+
+                    CSSCore.addClass(node, className);
+
+                    // Need to do this to actually trigger a transition.
+                    _this.queueClassAndNode(activeClassName, node);
+
+                    // If the user specified a timeout delay.
+                    if (userSpecifiedDelay) {
+                        // Clean-up the animation after the specified delay
+                        timeout = setTimeout(endListener, userSpecifiedDelay);
+                        _this.transitionTimeouts.push(timeout);
+                    } else {
+                        // DEPRECATED: this listener will be removed in a future version of react
+                        ReactTransitionEvents.addEndEventListener(node, endListener);
                     }
-                };
-
-                CSSCore.addClass(node, className);
-
-                // Need to do this to actually trigger a transition.
-                this.queueClassAndNode(activeClassName, node);
-
-                // If the user specified a timeout delay.
-                if (userSpecifiedDelay) {
-                    // Clean-up the animation after the specified delay
-                    timeout = setTimeout(endListener, userSpecifiedDelay);
-                    this.transitionTimeouts.push(timeout);
-                } else {
-                    // DEPRECATED: this listener will be removed in a future version of react
-                    ReactTransitionEvents.addEndEventListener(node, endListener);
-                }
-            },
-
-            queueClassAndNode: function(className, node) {
-                this.classNameAndNodeQueue.push({
-                    className: className,
-                    node: node
-                });
-
-                if (!this.timeout) {
-                    this.timeout = setTimeout(this.flushClassNameAndNodeQueue, TICK);
-                }
-            },
-
-            flushClassNameAndNodeQueue: function() {
-                if (this.isMounted()) {
-                    this.classNameAndNodeQueue.forEach(function(obj) {
-                        CSSCore.addClass(obj.node, obj.className);
+                }, _this.queueClassAndNode = function(className, node) {
+                    _this.classNameAndNodeQueue.push({
+                        className: className,
+                        node: node
                     });
-                }
-                this.classNameAndNodeQueue.length = 0;
-                this.timeout = null;
-            },
 
-            componentWillMount: function() {
+                    if (!_this.timeout) {
+                        _this.timeout = setTimeout(_this.flushClassNameAndNodeQueue, TICK);
+                    }
+                }, _this.flushClassNameAndNodeQueue = function() {
+                    if (_this._isMounted) {
+                        _this.classNameAndNodeQueue.forEach(function(obj) {
+                            CSSCore.addClass(obj.node, obj.className);
+                        });
+                    }
+                    _this.classNameAndNodeQueue.length = 0;
+                    _this.timeout = null;
+                }, _this.componentWillAppear = function(done) {
+                    if (_this.props.appear) {
+                        _this.transition('appear', done, _this.props.appearTimeout);
+                    } else {
+                        done();
+                    }
+                }, _this.componentWillEnter = function(done) {
+                    if (_this.props.enter) {
+                        _this.transition('enter', done, _this.props.enterTimeout);
+                    } else {
+                        done();
+                    }
+                }, _this.componentWillLeave = function(done) {
+                    if (_this.props.leave) {
+                        _this.transition('leave', done, _this.props.leaveTimeout);
+                    } else {
+                        done();
+                    }
+                }, _temp), _possibleConstructorReturn(_this, _ret);
+            }
+
+            ReactCSSTransitionGroupChild.prototype.componentWillMount = function componentWillMount() {
                 this.classNameAndNodeQueue = [];
                 this.transitionTimeouts = [];
-            },
+            };
 
-            componentWillUnmount: function() {
+            ReactCSSTransitionGroupChild.prototype.componentDidMount = function componentDidMount() {
+                this._isMounted = true;
+            };
+
+            ReactCSSTransitionGroupChild.prototype.componentWillUnmount = function componentWillUnmount() {
+                this._isMounted = false;
+
                 if (this.timeout) {
                     clearTimeout(this.timeout);
                 }
@@ -24839,46 +25568,51 @@
                 });
 
                 this.classNameAndNodeQueue.length = 0;
-            },
+            };
 
-            componentWillAppear: function(done) {
-                if (this.props.appear) {
-                    this.transition('appear', done, this.props.appearTimeout);
-                } else {
-                    done();
-                }
-            },
-
-            componentWillEnter: function(done) {
-                if (this.props.enter) {
-                    this.transition('enter', done, this.props.enterTimeout);
-                } else {
-                    done();
-                }
-            },
-
-            componentWillLeave: function(done) {
-                if (this.props.leave) {
-                    this.transition('leave', done, this.props.leaveTimeout);
-                } else {
-                    done();
-                }
-            },
-
-            render: function() {
+            ReactCSSTransitionGroupChild.prototype.render = function render() {
                 return onlyChild(this.props.children);
-            }
-        });
+            };
+
+            return ReactCSSTransitionGroupChild;
+        }(React.Component);
+
+        ReactCSSTransitionGroupChild.propTypes = {
+            name: PropTypes.oneOfType([PropTypes.string, PropTypes.shape({
+                enter: PropTypes.string,
+                leave: PropTypes.string,
+                active: PropTypes.string
+            }), PropTypes.shape({
+                enter: PropTypes.string,
+                enterActive: PropTypes.string,
+                leave: PropTypes.string,
+                leaveActive: PropTypes.string,
+                appear: PropTypes.string,
+                appearActive: PropTypes.string
+            })]).isRequired,
+
+            // Once we require timeouts to be specified, we can remove the
+            // boolean flags (appear etc.) and just accept a number
+            // or a bool for the timeout flags (appearTimeout etc.)
+            appear: PropTypes.bool,
+            enter: PropTypes.bool,
+            leave: PropTypes.bool,
+            appearTimeout: PropTypes.number,
+            enterTimeout: PropTypes.number,
+            leaveTimeout: PropTypes.number
+        };
+
 
         module.exports = ReactCSSTransitionGroupChild;
     }, {
-        "./React": 212,
-        "./ReactAddonsDOMDependencies": 213,
-        "./ReactTransitionEvents": 231,
-        "./onlyChild": 238,
-        "fbjs/lib/CSSCore": 13
+        "./React": 215,
+        "./ReactAddonsDOMDependencies": 216,
+        "./ReactTransitionEvents": 234,
+        "./onlyChild": 242,
+        "fbjs/lib/CSSCore": 13,
+        "prop-types/factory": 58
     }],
-    216: [function(require, module, exports) {
+    219: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -25071,12 +25805,12 @@
 
         module.exports = ReactChildren;
     }, {
-        "./PooledClass": 211,
-        "./ReactElement": 222,
-        "./traverseAllChildren": 240,
+        "./PooledClass": 214,
+        "./ReactElement": 225,
+        "./traverseAllChildren": 244,
         "fbjs/lib/emptyFunction": 21
     }],
-    217: [function(require, module, exports) {
+    220: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -25230,7 +25964,6 @@
              *   }
              *
              * @return {ReactComponent}
-             * @nosideeffects
              * @required
              */
             render: 'DEFINE_ONCE',
@@ -25687,6 +26420,8 @@
         var ReactClassComponent = function() {};
         _assign(ReactClassComponent.prototype, ReactComponent.prototype, ReactClassMixin);
 
+        var didWarnDeprecated = false;
+
         /**
          * Module for creating composite components.
          *
@@ -25703,6 +26438,11 @@
              * @public
              */
             createClass: function(spec) {
+                if ("dev" !== 'production') {
+                    "dev" !== 'production' ? warning(didWarnDeprecated, '%s: React.createClass is deprecated and will be removed in version 16. ' + 'Use plain JavaScript classes instead. If you\'re not yet ready to ' + 'migrate, create-react-class is available on npm as a ' + 'drop-in replacement.', spec && spec.displayName || 'A Component'): void 0;
+                    didWarnDeprecated = true;
+                }
+
                 // To keep our warnings more understandable, we'll use a little hack here to
                 // ensure that Constructor.name !== 'Constructor'. This makes sure we don't
                 // unnecessarily identify a class without displayName as 'Constructor'.
@@ -25794,17 +26534,17 @@
 
         module.exports = ReactClass;
     }, {
-        "./ReactComponent": 218,
-        "./ReactElement": 222,
-        "./ReactNoopUpdateQueue": 225,
-        "./ReactPropTypeLocationNames": 226,
-        "./reactProdInvariant": 239,
+        "./ReactComponent": 221,
+        "./ReactElement": 225,
+        "./ReactNoopUpdateQueue": 228,
+        "./ReactPropTypeLocationNames": 229,
+        "./reactProdInvariant": 243,
         "fbjs/lib/emptyObject": 22,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/warning": 36,
         "object-assign": 55
     }],
-    218: [function(require, module, exports) {
+    221: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -25923,14 +26663,14 @@
 
         module.exports = ReactComponent;
     }, {
-        "./ReactNoopUpdateQueue": 225,
-        "./canDefineProperty": 234,
-        "./reactProdInvariant": 239,
+        "./ReactNoopUpdateQueue": 228,
+        "./canDefineProperty": 237,
+        "./reactProdInvariant": 243,
         "fbjs/lib/emptyObject": 22,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/warning": 36
     }],
-    219: [function(require, module, exports) {
+    222: [function(require, module, exports) {
         /**
          * Copyright 2016-present, Facebook, Inc.
          * All rights reserved.
@@ -26264,12 +27004,12 @@
 
         module.exports = ReactComponentTreeHook;
     }, {
-        "./ReactCurrentOwner": 220,
-        "./reactProdInvariant": 239,
+        "./ReactCurrentOwner": 223,
+        "./reactProdInvariant": 243,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/warning": 36
     }],
-    220: [function(require, module, exports) {
+    223: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -26301,7 +27041,7 @@
 
         module.exports = ReactCurrentOwner;
     }, {}],
-    221: [function(require, module, exports) {
+    224: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -26472,10 +27212,10 @@
 
         module.exports = ReactDOMFactories;
     }, {
-        "./ReactElement": 222,
-        "./ReactElementValidator": 224
+        "./ReactElement": 225,
+        "./ReactElementValidator": 227
     }],
-    222: [function(require, module, exports) {
+    225: [function(require, module, exports) {
         /**
          * Copyright 2014-present, Facebook, Inc.
          * All rights reserved.
@@ -26817,18 +27557,18 @@
 
         module.exports = ReactElement;
     }, {
-        "./ReactCurrentOwner": 220,
-        "./ReactElementSymbol": 223,
-        "./canDefineProperty": 234,
+        "./ReactCurrentOwner": 223,
+        "./ReactElementSymbol": 226,
+        "./canDefineProperty": 237,
         "fbjs/lib/warning": 36,
         "object-assign": 55
     }],
-    223: [function(require, module, exports) {
-        arguments[4][110][0].apply(exports, arguments)
+    226: [function(require, module, exports) {
+        arguments[4][114][0].apply(exports, arguments)
     }, {
-        "dup": 110
+        "dup": 114
     }],
-    224: [function(require, module, exports) {
+    227: [function(require, module, exports) {
         /**
          * Copyright 2014-present, Facebook, Inc.
          * All rights reserved.
@@ -26864,6 +27604,16 @@
                 if (name) {
                     return ' Check the render method of `' + name + '`.';
                 }
+            }
+            return '';
+        }
+
+        function getSourceInfoErrorAddendum(elementProps) {
+            if (elementProps !== null && elementProps !== undefined && elementProps.__source !== undefined) {
+                var source = elementProps.__source;
+                var fileName = source.fileName.replace(/^.*[\\\/]/, '');
+                var lineNumber = source.lineNumber;
+                return ' Check your code at ' + fileName + ':' + lineNumber + '.';
             }
             return '';
         }
@@ -26998,7 +27748,16 @@
                         if (type === undefined || typeof type === 'object' && type !== null && Object.keys(type).length === 0) {
                             info += ' You likely forgot to export your component from the file ' + 'it\'s defined in.';
                         }
-                        info += getDeclarationErrorAddendum();
+
+                        var sourceInfo = getSourceInfoErrorAddendum(props);
+                        if (sourceInfo) {
+                            info += sourceInfo;
+                        } else {
+                            info += getDeclarationErrorAddendum();
+                        }
+
+                        info += ReactComponentTreeHook.getCurrentStackAddendum();
+
                         "dev" !== 'production' ? warning(false, 'React.createElement: type is invalid -- expected a string (for ' + 'built-in components) or a class/function (for composite ' + 'components) but got: %s.%s', type == null ? type : typeof type, info): void 0;
                     }
                 }
@@ -27063,15 +27822,15 @@
 
         module.exports = ReactElementValidator;
     }, {
-        "./ReactComponentTreeHook": 219,
-        "./ReactCurrentOwner": 220,
-        "./ReactElement": 222,
-        "./canDefineProperty": 234,
-        "./checkReactTypeSpec": 235,
-        "./getIteratorFn": 237,
+        "./ReactComponentTreeHook": 222,
+        "./ReactCurrentOwner": 223,
+        "./ReactElement": 225,
+        "./canDefineProperty": 237,
+        "./checkReactTypeSpec": 238,
+        "./getIteratorFn": 240,
         "fbjs/lib/warning": 36
     }],
-    225: [function(require, module, exports) {
+    228: [function(require, module, exports) {
         /**
          * Copyright 2015-present, Facebook, Inc.
          * All rights reserved.
@@ -27170,12 +27929,12 @@
     }, {
         "fbjs/lib/warning": 36
     }],
-    226: [function(require, module, exports) {
-        arguments[4][129][0].apply(exports, arguments)
+    229: [function(require, module, exports) {
+        arguments[4][133][0].apply(exports, arguments)
     }, {
-        "dup": 129
+        "dup": 133
     }],
-    227: [function(require, module, exports) {
+    230: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -27188,442 +27947,22 @@
 
         'use strict';
 
-        var ReactElement = require('./ReactElement');
-        var ReactPropTypeLocationNames = require('./ReactPropTypeLocationNames');
-        var ReactPropTypesSecret = require('./ReactPropTypesSecret');
+        var _require = require('./ReactElement'),
+            isValidElement = _require.isValidElement;
 
-        var emptyFunction = require('fbjs/lib/emptyFunction');
-        var getIteratorFn = require('./getIteratorFn');
-        var warning = require('fbjs/lib/warning');
+        var factory = require('prop-types/factory');
 
-        /**
-         * Collection of methods that allow declaration and validation of props that are
-         * supplied to React components. Example usage:
-         *
-         *   var Props = require('ReactPropTypes');
-         *   var MyArticle = React.createClass({
-         *     propTypes: {
-         *       // An optional string prop named "description".
-         *       description: Props.string,
-         *
-         *       // A required enum prop named "category".
-         *       category: Props.oneOf(['News','Photos']).isRequired,
-         *
-         *       // A prop named "dialog" that requires an instance of Dialog.
-         *       dialog: Props.instanceOf(Dialog).isRequired
-         *     },
-         *     render: function() { ... }
-         *   });
-         *
-         * A more formal specification of how these methods are used:
-         *
-         *   type := array|bool|func|object|number|string|oneOf([...])|instanceOf(...)
-         *   decl := ReactPropTypes.{type}(.isRequired)?
-         *
-         * Each and every declaration produces a function with the same signature. This
-         * allows the creation of custom validation functions. For example:
-         *
-         *  var MyLink = React.createClass({
-         *    propTypes: {
-         *      // An optional string or URI prop named "href".
-         *      href: function(props, propName, componentName) {
-         *        var propValue = props[propName];
-         *        if (propValue != null && typeof propValue !== 'string' &&
-         *            !(propValue instanceof URI)) {
-         *          return new Error(
-         *            'Expected a string or an URI for ' + propName + ' in ' +
-         *            componentName
-         *          );
-         *        }
-         *      }
-         *    },
-         *    render: function() {...}
-         *  });
-         *
-         * @internal
-         */
-
-        var ANONYMOUS = '<<anonymous>>';
-
-        var ReactPropTypes = {
-            array: createPrimitiveTypeChecker('array'),
-            bool: createPrimitiveTypeChecker('boolean'),
-            func: createPrimitiveTypeChecker('function'),
-            number: createPrimitiveTypeChecker('number'),
-            object: createPrimitiveTypeChecker('object'),
-            string: createPrimitiveTypeChecker('string'),
-            symbol: createPrimitiveTypeChecker('symbol'),
-
-            any: createAnyTypeChecker(),
-            arrayOf: createArrayOfTypeChecker,
-            element: createElementTypeChecker(),
-            instanceOf: createInstanceTypeChecker,
-            node: createNodeChecker(),
-            objectOf: createObjectOfTypeChecker,
-            oneOf: createEnumTypeChecker,
-            oneOfType: createUnionTypeChecker,
-            shape: createShapeTypeChecker
-        };
-
-        /**
-         * inlined Object.is polyfill to avoid requiring consumers ship their own
-         * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
-         */
-        /*eslint-disable no-self-compare*/
-        function is(x, y) {
-            // SameValue algorithm
-            if (x === y) {
-                // Steps 1-5, 7-10
-                // Steps 6.b-6.e: +0 != -0
-                return x !== 0 || 1 / x === 1 / y;
-            } else {
-                // Step 6.a: NaN == NaN
-                return x !== x && y !== y;
-            }
-        }
-        /*eslint-enable no-self-compare*/
-
-        /**
-         * We use an Error-like object for backward compatibility as people may call
-         * PropTypes directly and inspect their output. However we don't use real
-         * Errors anymore. We don't inspect their stack anyway, and creating them
-         * is prohibitively expensive if they are created too often, such as what
-         * happens in oneOfType() for any type before the one that matched.
-         */
-        function PropTypeError(message) {
-            this.message = message;
-            this.stack = '';
-        }
-        // Make `instanceof Error` still work for returned errors.
-        PropTypeError.prototype = Error.prototype;
-
-        function createChainableTypeChecker(validate) {
-            if ("dev" !== 'production') {
-                var manualPropTypeCallCache = {};
-            }
-
-            function checkType(isRequired, props, propName, componentName, location, propFullName, secret) {
-                componentName = componentName || ANONYMOUS;
-                propFullName = propFullName || propName;
-                if ("dev" !== 'production') {
-                    if (secret !== ReactPropTypesSecret && typeof console !== 'undefined') {
-                        var cacheKey = componentName + ':' + propName;
-                        if (!manualPropTypeCallCache[cacheKey]) {
-                            "dev" !== 'production' ? warning(false, 'You are manually calling a React.PropTypes validation ' + 'function for the `%s` prop on `%s`. This is deprecated ' + 'and will not work in production with the next major version. ' + 'You may be seeing this warning due to a third-party PropTypes ' + 'library. See https://fb.me/react-warning-dont-call-proptypes ' + 'for details.', propFullName, componentName): void 0;
-                            manualPropTypeCallCache[cacheKey] = true;
-                        }
-                    }
-                }
-                if (props[propName] == null) {
-                    var locationName = ReactPropTypeLocationNames[location];
-                    if (isRequired) {
-                        if (props[propName] === null) {
-                            return new PropTypeError('The ' + locationName + ' `' + propFullName + '` is marked as required ' + ('in `' + componentName + '`, but its value is `null`.'));
-                        }
-                        return new PropTypeError('The ' + locationName + ' `' + propFullName + '` is marked as required in ' + ('`' + componentName + '`, but its value is `undefined`.'));
-                    }
-                    return null;
-                } else {
-                    return validate(props, propName, componentName, location, propFullName);
-                }
-            }
-
-            var chainedCheckType = checkType.bind(null, false);
-            chainedCheckType.isRequired = checkType.bind(null, true);
-
-            return chainedCheckType;
-        }
-
-        function createPrimitiveTypeChecker(expectedType) {
-            function validate(props, propName, componentName, location, propFullName, secret) {
-                var propValue = props[propName];
-                var propType = getPropType(propValue);
-                if (propType !== expectedType) {
-                    var locationName = ReactPropTypeLocationNames[location];
-                    // `propValue` being instance of, say, date/regexp, pass the 'object'
-                    // check, but we can offer a more precise error message here rather than
-                    // 'of type `object`'.
-                    var preciseType = getPreciseType(propValue);
-
-                    return new PropTypeError('Invalid ' + locationName + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'));
-                }
-                return null;
-            }
-            return createChainableTypeChecker(validate);
-        }
-
-        function createAnyTypeChecker() {
-            return createChainableTypeChecker(emptyFunction.thatReturns(null));
-        }
-
-        function createArrayOfTypeChecker(typeChecker) {
-            function validate(props, propName, componentName, location, propFullName) {
-                if (typeof typeChecker !== 'function') {
-                    return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside arrayOf.');
-                }
-                var propValue = props[propName];
-                if (!Array.isArray(propValue)) {
-                    var locationName = ReactPropTypeLocationNames[location];
-                    var propType = getPropType(propValue);
-                    return new PropTypeError('Invalid ' + locationName + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an array.'));
-                }
-                for (var i = 0; i < propValue.length; i++) {
-                    var error = typeChecker(propValue, i, componentName, location, propFullName + '[' + i + ']', ReactPropTypesSecret);
-                    if (error instanceof Error) {
-                        return error;
-                    }
-                }
-                return null;
-            }
-            return createChainableTypeChecker(validate);
-        }
-
-        function createElementTypeChecker() {
-            function validate(props, propName, componentName, location, propFullName) {
-                var propValue = props[propName];
-                if (!ReactElement.isValidElement(propValue)) {
-                    var locationName = ReactPropTypeLocationNames[location];
-                    var propType = getPropType(propValue);
-                    return new PropTypeError('Invalid ' + locationName + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement.'));
-                }
-                return null;
-            }
-            return createChainableTypeChecker(validate);
-        }
-
-        function createInstanceTypeChecker(expectedClass) {
-            function validate(props, propName, componentName, location, propFullName) {
-                if (!(props[propName] instanceof expectedClass)) {
-                    var locationName = ReactPropTypeLocationNames[location];
-                    var expectedClassName = expectedClass.name || ANONYMOUS;
-                    var actualClassName = getClassName(props[propName]);
-                    return new PropTypeError('Invalid ' + locationName + ' `' + propFullName + '` of type ' + ('`' + actualClassName + '` supplied to `' + componentName + '`, expected ') + ('instance of `' + expectedClassName + '`.'));
-                }
-                return null;
-            }
-            return createChainableTypeChecker(validate);
-        }
-
-        function createEnumTypeChecker(expectedValues) {
-            if (!Array.isArray(expectedValues)) {
-                "dev" !== 'production' ? warning(false, 'Invalid argument supplied to oneOf, expected an instance of array.'): void 0;
-                return emptyFunction.thatReturnsNull;
-            }
-
-            function validate(props, propName, componentName, location, propFullName) {
-                var propValue = props[propName];
-                for (var i = 0; i < expectedValues.length; i++) {
-                    if (is(propValue, expectedValues[i])) {
-                        return null;
-                    }
-                }
-
-                var locationName = ReactPropTypeLocationNames[location];
-                var valuesString = JSON.stringify(expectedValues);
-                return new PropTypeError('Invalid ' + locationName + ' `' + propFullName + '` of value `' + propValue + '` ' + ('supplied to `' + componentName + '`, expected one of ' + valuesString + '.'));
-            }
-            return createChainableTypeChecker(validate);
-        }
-
-        function createObjectOfTypeChecker(typeChecker) {
-            function validate(props, propName, componentName, location, propFullName) {
-                if (typeof typeChecker !== 'function') {
-                    return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside objectOf.');
-                }
-                var propValue = props[propName];
-                var propType = getPropType(propValue);
-                if (propType !== 'object') {
-                    var locationName = ReactPropTypeLocationNames[location];
-                    return new PropTypeError('Invalid ' + locationName + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an object.'));
-                }
-                for (var key in propValue) {
-                    if (propValue.hasOwnProperty(key)) {
-                        var error = typeChecker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-                        if (error instanceof Error) {
-                            return error;
-                        }
-                    }
-                }
-                return null;
-            }
-            return createChainableTypeChecker(validate);
-        }
-
-        function createUnionTypeChecker(arrayOfTypeCheckers) {
-            if (!Array.isArray(arrayOfTypeCheckers)) {
-                "dev" !== 'production' ? warning(false, 'Invalid argument supplied to oneOfType, expected an instance of array.'): void 0;
-                return emptyFunction.thatReturnsNull;
-            }
-
-            function validate(props, propName, componentName, location, propFullName) {
-                for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
-                    var checker = arrayOfTypeCheckers[i];
-                    if (checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret) == null) {
-                        return null;
-                    }
-                }
-
-                var locationName = ReactPropTypeLocationNames[location];
-                return new PropTypeError('Invalid ' + locationName + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`.'));
-            }
-            return createChainableTypeChecker(validate);
-        }
-
-        function createNodeChecker() {
-            function validate(props, propName, componentName, location, propFullName) {
-                if (!isNode(props[propName])) {
-                    var locationName = ReactPropTypeLocationNames[location];
-                    return new PropTypeError('Invalid ' + locationName + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`, expected a ReactNode.'));
-                }
-                return null;
-            }
-            return createChainableTypeChecker(validate);
-        }
-
-        function createShapeTypeChecker(shapeTypes) {
-            function validate(props, propName, componentName, location, propFullName) {
-                var propValue = props[propName];
-                var propType = getPropType(propValue);
-                if (propType !== 'object') {
-                    var locationName = ReactPropTypeLocationNames[location];
-                    return new PropTypeError('Invalid ' + locationName + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
-                }
-                for (var key in shapeTypes) {
-                    var checker = shapeTypes[key];
-                    if (!checker) {
-                        continue;
-                    }
-                    var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-                    if (error) {
-                        return error;
-                    }
-                }
-                return null;
-            }
-            return createChainableTypeChecker(validate);
-        }
-
-        function isNode(propValue) {
-            switch (typeof propValue) {
-                case 'number':
-                case 'string':
-                case 'undefined':
-                    return true;
-                case 'boolean':
-                    return !propValue;
-                case 'object':
-                    if (Array.isArray(propValue)) {
-                        return propValue.every(isNode);
-                    }
-                    if (propValue === null || ReactElement.isValidElement(propValue)) {
-                        return true;
-                    }
-
-                    var iteratorFn = getIteratorFn(propValue);
-                    if (iteratorFn) {
-                        var iterator = iteratorFn.call(propValue);
-                        var step;
-                        if (iteratorFn !== propValue.entries) {
-                            while (!(step = iterator.next()).done) {
-                                if (!isNode(step.value)) {
-                                    return false;
-                                }
-                            }
-                        } else {
-                            // Iterator will provide entry [k,v] tuples rather than values.
-                            while (!(step = iterator.next()).done) {
-                                var entry = step.value;
-                                if (entry) {
-                                    if (!isNode(entry[1])) {
-                                        return false;
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        return false;
-                    }
-
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        function isSymbol(propType, propValue) {
-            // Native Symbol.
-            if (propType === 'symbol') {
-                return true;
-            }
-
-            // 19.4.3.5 Symbol.prototype[@@toStringTag] === 'Symbol'
-            if (propValue['@@toStringTag'] === 'Symbol') {
-                return true;
-            }
-
-            // Fallback for non-spec compliant Symbols which are polyfilled.
-            if (typeof Symbol === 'function' && propValue instanceof Symbol) {
-                return true;
-            }
-
-            return false;
-        }
-
-        // Equivalent of `typeof` but with special handling for array and regexp.
-        function getPropType(propValue) {
-            var propType = typeof propValue;
-            if (Array.isArray(propValue)) {
-                return 'array';
-            }
-            if (propValue instanceof RegExp) {
-                // Old webkits (at least until Android 4.0) return 'function' rather than
-                // 'object' for typeof a RegExp. We'll normalize this here so that /bla/
-                // passes PropTypes.object.
-                return 'object';
-            }
-            if (isSymbol(propType, propValue)) {
-                return 'symbol';
-            }
-            return propType;
-        }
-
-        // This handles more types than `getPropType`. Only used for error messages.
-        // See `createPrimitiveTypeChecker`.
-        function getPreciseType(propValue) {
-            var propType = getPropType(propValue);
-            if (propType === 'object') {
-                if (propValue instanceof Date) {
-                    return 'date';
-                } else if (propValue instanceof RegExp) {
-                    return 'regexp';
-                }
-            }
-            return propType;
-        }
-
-        // Returns class name of the object, if any.
-        function getClassName(propValue) {
-            if (!propValue.constructor || !propValue.constructor.name) {
-                return ANONYMOUS;
-            }
-            return propValue.constructor.name;
-        }
-
-        module.exports = ReactPropTypes;
+        module.exports = factory(isValidElement);
     }, {
-        "./ReactElement": 222,
-        "./ReactPropTypeLocationNames": 226,
-        "./ReactPropTypesSecret": 228,
-        "./getIteratorFn": 237,
-        "fbjs/lib/emptyFunction": 21,
-        "fbjs/lib/warning": 36
+        "./ReactElement": 225,
+        "prop-types/factory": 58
     }],
-    228: [function(require, module, exports) {
-        arguments[4][130][0].apply(exports, arguments)
+    231: [function(require, module, exports) {
+        arguments[4][134][0].apply(exports, arguments)
     }, {
-        "dup": 130
+        "dup": 134
     }],
-    229: [function(require, module, exports) {
+    232: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -27666,12 +28005,12 @@
 
         module.exports = ReactPureComponent;
     }, {
-        "./ReactComponent": 218,
-        "./ReactNoopUpdateQueue": 225,
+        "./ReactComponent": 221,
+        "./ReactNoopUpdateQueue": 228,
         "fbjs/lib/emptyObject": 22,
         "object-assign": 55
     }],
-    230: [function(require, module, exports) {
+    233: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -27775,9 +28114,9 @@
 
         module.exports = ReactTransitionChildMapping;
     }, {
-        "./flattenChildren": 236
+        "./flattenChildren": 239
     }],
-    231: [function(require, module, exports) {
+    234: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -27852,9 +28191,9 @@
         module.exports = ReactTransitionEvents;
     }, {
         "fbjs/lib/ExecutionEnvironment": 15,
-        "react-dom/lib/getVendorPrefixedEventName": 177
+        "react-dom/lib/getVendorPrefixedEventName": 180
     }],
-    232: [function(require, module, exports) {
+    235: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -27899,6 +28238,9 @@
 
         var React = require('./React');
         var ReactTransitionChildMapping = require('./ReactTransitionChildMapping');
+
+        var propTypesFactory = require('prop-types/factory');
+        var PropTypes = propTypesFactory(React.isValidElement);
 
         var emptyFunction = require('fbjs/lib/emptyFunction');
 
@@ -28100,8 +28442,8 @@
 
         ReactTransitionGroup.displayName = 'ReactTransitionGroup';
         ReactTransitionGroup.propTypes = {
-            component: React.PropTypes.any,
-            childFactory: React.PropTypes.func
+            component: PropTypes.any,
+            childFactory: PropTypes.func
         };
         ReactTransitionGroup.defaultProps = {
             component: 'span',
@@ -28111,17 +28453,18 @@
 
         module.exports = ReactTransitionGroup;
     }, {
-        "./React": 212,
-        "./ReactTransitionChildMapping": 230,
+        "./React": 215,
+        "./ReactTransitionChildMapping": 233,
         "fbjs/lib/emptyFunction": 21,
-        "object-assign": 55
+        "object-assign": 55,
+        "prop-types/factory": 58
     }],
-    233: [function(require, module, exports) {
-        arguments[4][140][0].apply(exports, arguments)
+    236: [function(require, module, exports) {
+        arguments[4][144][0].apply(exports, arguments)
     }, {
-        "dup": 140
+        "dup": 144
     }],
-    234: [function(require, module, exports) {
+    237: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -28150,7 +28493,7 @@
 
         module.exports = canDefineProperty;
     }, {}],
-    235: [function(require, module, exports) {
+    238: [function(require, module, exports) {
         (function(process) {
             /**
              * Copyright 2013-present, Facebook, Inc.
@@ -28240,15 +28583,15 @@
             module.exports = checkReactTypeSpec;
         }).call(this, require('_process'))
     }, {
-        "./ReactComponentTreeHook": 219,
-        "./ReactPropTypeLocationNames": 226,
-        "./ReactPropTypesSecret": 228,
-        "./reactProdInvariant": 239,
+        "./ReactComponentTreeHook": 222,
+        "./ReactPropTypeLocationNames": 229,
+        "./ReactPropTypesSecret": 231,
+        "./reactProdInvariant": 243,
         "_process": 56,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/warning": 36
     }],
-    236: [function(require, module, exports) {
+    239: [function(require, module, exports) {
         (function(process) {
             /**
              * Copyright 2013-present, Facebook, Inc.
@@ -28327,18 +28670,40 @@
             module.exports = flattenChildren;
         }).call(this, require('_process'))
     }, {
-        "./KeyEscapeUtils": 210,
-        "./ReactComponentTreeHook": 219,
-        "./traverseAllChildren": 240,
+        "./KeyEscapeUtils": 213,
+        "./ReactComponentTreeHook": 222,
+        "./traverseAllChildren": 244,
         "_process": 56,
         "fbjs/lib/warning": 36
     }],
-    237: [function(require, module, exports) {
-        arguments[4][173][0].apply(exports, arguments)
+    240: [function(require, module, exports) {
+        arguments[4][177][0].apply(exports, arguments)
     }, {
-        "dup": 173
+        "dup": 177
     }],
-    238: [function(require, module, exports) {
+    241: [function(require, module, exports) {
+        /**
+         * Copyright 2013-present, Facebook, Inc.
+         * All rights reserved.
+         *
+         * This source code is licensed under the BSD-style license found in the
+         * LICENSE file in the root directory of this source tree. An additional grant
+         * of patent rights can be found in the PATENTS file in the same directory.
+         *
+         * 
+         */
+
+        'use strict';
+
+        var nextDebugID = 1;
+
+        function getNextDebugID() {
+            return nextDebugID++;
+        }
+
+        module.exports = getNextDebugID;
+    }, {}],
+    242: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -28377,16 +28742,16 @@
 
         module.exports = onlyChild;
     }, {
-        "./ReactElement": 222,
-        "./reactProdInvariant": 239,
+        "./ReactElement": 225,
+        "./reactProdInvariant": 243,
         "fbjs/lib/invariant": 29
     }],
-    239: [function(require, module, exports) {
-        arguments[4][182][0].apply(exports, arguments)
+    243: [function(require, module, exports) {
+        arguments[4][185][0].apply(exports, arguments)
     }, {
-        "dup": 182
+        "dup": 185
     }],
-    240: [function(require, module, exports) {
+    244: [function(require, module, exports) {
         /**
          * Copyright 2013-present, Facebook, Inc.
          * All rights reserved.
@@ -28563,23 +28928,23 @@
 
         module.exports = traverseAllChildren;
     }, {
-        "./KeyEscapeUtils": 210,
-        "./ReactCurrentOwner": 220,
-        "./ReactElementSymbol": 223,
-        "./getIteratorFn": 237,
-        "./reactProdInvariant": 239,
+        "./KeyEscapeUtils": 213,
+        "./ReactCurrentOwner": 223,
+        "./ReactElementSymbol": 226,
+        "./getIteratorFn": 240,
+        "./reactProdInvariant": 243,
         "fbjs/lib/invariant": 29,
         "fbjs/lib/warning": 36
     }],
-    241: [function(require, module, exports) {
+    245: [function(require, module, exports) {
         'use strict';
 
         module.exports = require('./lib/React');
 
     }, {
-        "./lib/React": 212
+        "./lib/React": 215
     }],
-    242: [function(require, module, exports) {
+    246: [function(require, module, exports) {
         'use strict';
 
         var _createClass = function() {
@@ -28783,9 +29148,9 @@
         module.exports = CheckButton;
 
     }, {
-        "react": 241
+        "react": 245
     }],
-    243: [function(require, module, exports) {
+    247: [function(require, module, exports) {
         'use strict';
 
         var _createClass = function() {
@@ -29187,11 +29552,11 @@
         module.exports = Gallery;
 
     }, {
-        "./Image.js": 244,
-        "react": 241,
-        "react-images": 189
+        "./Image.js": 248,
+        "react": 245,
+        "react-images": 192
     }],
-    244: [function(require, module, exports) {
+    248: [function(require, module, exports) {
         'use strict';
 
         Object.defineProperty(exports, "__esModule", {
@@ -29363,6 +29728,18 @@
                         );
                     });
 
+                    var customOverlay = typeof this.props.item.customOverlay === 'undefined' ? _react2.default.createElement('noscript', null) : _react2.default.createElement(
+                        'div', {
+                            style: {
+                                opacity: this.state.hover ? 1 : 0,
+                                position: "absolute",
+                                height: "100%",
+                                width: "100%"
+                            }
+                        },
+                        this.props.item.customOverlay
+                    );
+
                     return _react2.default.createElement(
                         'div', {
                             className: 'tile',
@@ -29416,7 +29793,7 @@
                             },
                             tags
                         ),
-                        this.props.item.customOverlay ? this.props.item.customOverlay : '',
+                        customOverlay,
                         _react2.default.createElement('div', {
                             className: 'tile-overlay',
                             key: "tile-overlay-" + this.props.index,
@@ -29461,7 +29838,8 @@
             height: _react.PropTypes.number,
             isSelectable: _react.PropTypes.bool,
             onClick: _react.PropTypes.func,
-            onSelectImage: _react.PropTypes.func
+            onSelectImage: _react.PropTypes.func,
+            customOverlay: _react.PropTypes.element
         };
 
         Image.defaultProps = {
@@ -29486,7 +29864,7 @@
         exports.default = Image;
 
     }, {
-        "./CheckButton.js": 242,
-        "react": 241
+        "./CheckButton.js": 246,
+        "react": 245
     }]
 }, {}, [1, 2, 3, 4]);
